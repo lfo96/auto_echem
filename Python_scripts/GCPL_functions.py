@@ -3,7 +3,7 @@ np.seterr(divide='ignore', invalid='ignore')
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
-import gspread
+# import gspread
 
 from Python_scripts.general_functions import info
 from Python_scripts.general_functions import layout

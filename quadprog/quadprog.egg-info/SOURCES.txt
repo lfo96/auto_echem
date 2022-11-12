@@ -1,0 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+quadprog/linear-algebra.c
+quadprog/qr-update.c
+quadprog/quadprog.c
+quadprog/solve.QP.c
+quadprog.egg-info/PKG-INFO
+quadprog.egg-info/SOURCES.txt
+quadprog.egg-info/dependency_links.txt
+quadprog.egg-info/requires.txt
+quadprog.egg-info/top_level.txt

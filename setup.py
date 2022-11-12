@@ -1,17 +1,22 @@
 # Process and convert files from BioLogic's EC-lab https://pypi.org/project/eclabfiles/
+from setuptools import setup
 
-import numpy
-import scipy
-import galvani 
-print('Successfully imported galvani.')
-## EISArt for impedance analysis https://github.com/leehangyue/EISART
-## Authors for citation when EISArt used in scientific work.
-#import EISART.code.EISART
-#print('Successfully imported EISArt.')
+setup(
+    name='Auto EChem',
+    version='0.0.1',
+    install_requires=[
+        'numpy',
+        'scipy',
+        'galvani',
+        'impedance'
+    ]
+)
 
-import Python_scripts.general_functions
-import Python_scripts.GCPL_functions
-import Python_scripts.impedance_functions
-import Python_scripts.three_el_functions
-import Python_scripts.auto
-print('Successfully imported auto_chem functions.')
+# pip install 
+# import scipy
+# import galvani 
+# print('Successfully imported galvani.')
+# ## EISArt for impedance analysis https://github.com/leehangyue/EISART
+# ## Authors for citation when EISArt used in scientific work.
+# #import EISART.code.EISART
+# #print('Successfully imported EISArt.')

@@ -8,7 +8,8 @@ setup(
         'numpy',
         'scipy',
         'galvani',
-        'impedance'
+        'impedance',
+        'gspread'
     ]
 )
 

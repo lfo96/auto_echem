@@ -1,4 +1,7 @@
 # Process and convert files from BioLogic's EC-lab https://pypi.org/project/eclabfiles/
+
+import numpy
+import scipy
 import galvani 
 print('Successfully imported galvani.')
 ## EISArt for impedance analysis https://github.com/leehangyue/EISART

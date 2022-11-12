@@ -10,8 +10,8 @@ from Python_scripts.general_functions import layout
 from Python_scripts.general_functions import isclose
 from Python_scripts.general_functions import data_set
 
-from Python_scripts.neware_reader_master.neware import *
-
+#from Python_scripts.neware_reader_master.neware import *
+from .neware_reader_master.neware import *
 from scipy.integrate import simps
 
 def eva_GCPL(df,m_am,A_el):

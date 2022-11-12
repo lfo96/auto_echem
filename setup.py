@@ -1,7 +1,7 @@
 # Process and convert files from BioLogic's EC-lab https://pypi.org/project/eclabfiles/
 import galvani 
 
-import EISART.quadprof-0.1.11.setup
+import quadprog.setup
 
 # EISArt for impedance analysis https://github.com/leehangyue/EISART
 # Authors for citation when EISArt used in scientific work.

@@ -77,7 +77,7 @@ from scipy.signal import fftconvolve, convolve
 # from scipy.optimize import lsq_linear
 # from cvxopt.solvers import coneqp, options
 # from cvxopt import matrix
-from quadprog.quadprog import solve_qp as qp  # this module requires C compiler
+from quadprog import solve_qp as qp  # this module requires C compiler
 # from qpsolvers import solve_qp as qp
 from copy import deepcopy
 from os import path, makedirs

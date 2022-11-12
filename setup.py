@@ -1,6 +1,6 @@
 # Process and convert files from BioLogic's EC-lab https://pypi.org/project/eclabfiles/
 import galvani 
-
+import EISART.code.EISArt
 import Python_scripts.general_functions
 import Python_scripts.GCPL_functions
 import Python_scripts.impedance_functions

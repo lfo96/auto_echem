@@ -32,7 +32,23 @@ from Python_scripts.GCPL_functions import cy_index
 
 
 def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_para = 0, cy = [1,2,5,10,20,30,50],l=0.14, r_cc=5, PEIS_evaluation = True, lf_limit=''):
+    '''
+    Automatically detect and analysis the measurements produced by EC-lab.
+    Insert pathway with EC-lab settings file (.mps)
+    Returns a dictionary (dict) with meta data, all the raw data  (dict['data']), and the evaluated raw data (dict['eva']). 
 
+    Arguments explanation:
+    circ: specify the circuit used for impedance fitting. Standard is 'Rp' which is a simple R0-p(R1-CPE1) circuit.
+    plot: if set False, does not plot any evaluated data
+    resttime: resttime in between measurements (usually when having a loop over impedance measurements). Will exctract and overwrite the value from the setting file.
+    save: specify a name if you wish to save your plots
+    fit_para: different initial conditions for impedance fit. Depending on the electronic circuit specified in "circ" various conditions are used. The specific condition can be found inside the "impedance_functions.py". 
+    cy: specify the number of cycles you wish to display in your GCPL plot.
+    l: used for linear sweep voltametry to caluclate electronic conductivity
+    r_cc: actually forgot what this is 
+    PEIS_evaluation: if set to False, will not fit any impedance data
+    lf_limit: sets a low frequenecy limit for impedance fit, essentially cuts of every measurement point below a frequency determinede in Hz
+    '''
     meta = info(pathway)
     d_eva = {}
     circ_count = 0

@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name='Auto EChem',
     version='0.0.1',
-    packages=['Python_script'],
+    packages=['Python_scripts'],
     install_requires=[
         'numpy',
         'scipy',

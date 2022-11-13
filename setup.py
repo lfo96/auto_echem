@@ -1,4 +1,5 @@
 from setuptools import setup
+setuptools.find_packages('Python_scripts')
 
 setup(
     name='Auto EChem',
@@ -11,4 +12,3 @@ setup(
         'gspread'
     ]
 )
-setuptools.find_packages()

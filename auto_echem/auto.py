@@ -12,23 +12,23 @@ from itertools import islice
 from galvani import BioLogic as BL
 from contextlib import contextmanager
 
-from Python_scripts.general_functions import info
-from Python_scripts.general_functions import find_nearest
-from Python_scripts.general_functions import LSV_cond
-from Python_scripts.general_functions import layout
-from Python_scripts.general_functions import isclose
+from auto_echem.general_functions import info
+from auto_echem.general_functions import find_nearest
+from auto_echem.general_functions import LSV_cond
+from auto_echem.general_functions import layout
+from auto_echem.general_functions import isclose
 
-from Python_scripts.impedance_functions import Nynquist
-from Python_scripts.impedance_functions import parameter
-from Python_scripts.impedance_functions import plot_PEIS
-from Python_scripts.impedance_functions import plot_R
-from Python_scripts.impedance_functions import eva_PEIS
-from Python_scripts.impedance_functions import strip_plate
+from auto_echem.impedance_functions import Nynquist
+from auto_echem.impedance_functions import parameter
+from auto_echem.impedance_functions import plot_PEIS
+from auto_echem.impedance_functions import plot_R
+from auto_echem.impedance_functions import eva_PEIS
+from auto_echem.impedance_functions import strip_plate
 
-from Python_scripts.GCPL_functions import eva_GCPL
-from Python_scripts.GCPL_functions import plot_galv
-from Python_scripts.GCPL_functions import plot_CR
-from Python_scripts.GCPL_functions import cy_index
+from auto_echem.GCPL_functions import eva_GCPL
+from auto_echem.GCPL_functions import plot_galv
+from auto_echem.GCPL_functions import plot_CR
+from auto_echem.GCPL_functions import cy_index
 
 
 

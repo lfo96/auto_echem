@@ -27,6 +27,7 @@ from Python_scripts.impedance_functions import strip_plate
 
 from Python_scripts.GCPL_functions import eva_GCPL
 from Python_scripts.GCPL_functions import plot_galv
+from Python_scripts.GCPL_functions import plot_CR
 from Python_scripts.GCPL_functions import cy_index
 
 
@@ -149,6 +150,7 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 d = eva_GCPL(meta['data'][entry], meta['active material mass'], meta['electrode surface area'])
                 if plot == '':
                     plot_galv(d, save = save, cy = cy)
+                    plot_CR(d, save = save)
                 d_eva[entry] = d
                 end = time.time()
                 print(entry + ' evaluated in '+str(round(end - start,2))+' seconds.')

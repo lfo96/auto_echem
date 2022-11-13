@@ -330,6 +330,21 @@ def plot_galv(evaluate, cy = [1,2,5,10,20,30,50], save = "", x_lim = "", y_lim =
     if save != "":
          plt.savefig(str(save)+".svg", bbox_inches='tight', transparent = True)
 
+    def plot_CR(d, save = ''):
+        fig,ax = plt.subplots()
+        ax.scatter(d[0]['Cycle'],d[0]['Gravimetric Discharge Capacity (mAh/g)'], color='black')
+        layout(ax, x_label = 'Cycle',y_label = r'Gravimetric Capacity ($\mathregular{mAh\,g^{-1}}$)')
+        ax2 = ax.twinx()
+        ax2.scatter(d[0]['Cycle'],d[0]['Coulombic Efficency (%)'], color = 'tab:red', marker = '*',  s= 100,facecolors='none')
+        ax2.set_ylabel('Coulombic Efficiency (%)',fontsize = 16,color='white',path_effects=[pe.withStroke(linewidth=1.5, foreground="tab:red")])  #
+        plt.yticks(fontsize=12,color='white',path_effects=[pe.withStroke(linewidth=1.5, foreground="tab:red")])
+        ax2.tick_params(direction='in', length=6, width=1.5, color = 'tab:red')
+        ax2.spines["right"].set_color('tab:red')
+        layout(ax2, y_label = 'Coulombic Efficiency')
+        if save != "":
+            plt.savefig(str(save)+"_CR.svg", bbox_inches='tight', transparent = True)
+        return()                            
+
 def quick(path, save = '', cy = [1,2,5,10,20,30,50], title = '', calc = False):
     file = info(path)
     if save != '':

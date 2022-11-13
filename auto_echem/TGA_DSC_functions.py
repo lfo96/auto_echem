@@ -6,7 +6,7 @@ import numpy as np
 import datetime as dt
 
 from itertools import islice
-from Python_scripts.general_functions import layout
+from auto_echem.general_functions import layout
 
 def TGA_DSC(pathway, plot = True, save = '', x_lim='', y_lim ='', y2_lim = '', m_real = ''):
     with open(pathway,encoding= 'unicode_escape') as fin:

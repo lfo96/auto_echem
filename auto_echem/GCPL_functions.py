@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import datetime
 # import gspread
 
-from Python_scripts.general_functions import info
-from Python_scripts.general_functions import layout
-from Python_scripts.general_functions import isclose
-from Python_scripts.general_functions import data_set
+from auto_echem.general_functions import info
+from auto_echem.general_functions import layout
+from auto_echem.general_functions import isclose
+from auto_echem.general_functions import data_set
 
 #from Python_scripts.neware_reader_master.neware import *
 # from .neware_reader_master.neware import *

@@ -1,5 +1,6 @@
 from setuptools import setup
-setuptools.find_packages('Python_scripts')
+
+#setuptools.find_packages('Python_scripts')
 
 setup(
     name='Auto EChem',
@@ -9,6 +10,15 @@ setup(
         'scipy',
         'galvani',
         'impedance',
-        'gspread'
+        'gspread',
+        py_modules = [
+            'Python_scripts\auto',
+            'Python_scripts\GCPL_functions',
+            'Python_scripts\impedance_functions',
+            'Python_scripts\general_functions',
+            'Python_scripts\TGA_DSC_functions',
+            'Python_scripts\three_el_functions',
+            'Python_scripts\XPS_functions',
+            ],
     ]
 )

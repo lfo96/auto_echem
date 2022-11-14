@@ -341,6 +341,7 @@ def plot_CR(d, save = ''):
     plt.yticks(fontsize=12,color='white',path_effects=[pe.withStroke(linewidth=1.5, foreground="tab:red")])
     ax2.tick_params(direction='in', length=6, width=1.5, color = 'tab:red')
     ax2.spines["right"].set_color('tab:red')
+    ax2.hlines(100,0,len(d[0]['Cycle']),color='tab:red', linestyles='--')
     layout(ax2, y_label = 'Coulombic Efficiency')
     if save != "":
         plt.savefig(str(save)+"_CR.svg", bbox_inches='tight', transparent = True)

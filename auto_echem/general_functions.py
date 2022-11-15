@@ -453,7 +453,8 @@ tech = {
     'Loop': 'l',
     'Wait' : 'w',
     'Linear Sweep Voltammetry' : 'LSV',
-    'Galvano Electrochemical Impedance Spectroscopy' : 'GEIS'
+    'Galvano Electrochemical Impedance Spectroscopy' : 'GEIS',
+    'Chronopotentiometry' : 'CP'
     }
 
 def LSV_cond(raw,d=0.14,r_cc = 5):

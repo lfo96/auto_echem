@@ -11,11 +11,6 @@ import datetime
 #from auto_echem.general_functions import isclose
 #from auto_echem.general_functions import data_set
 
-from general_functions import info
-from general_functions import layout
-from general_functions import isclose
-from general_functions import data_set
-
 #from Python_scripts.neware_reader_master.neware import *
 # from .neware_reader_master.neware import *
 from scipy.integrate import simps

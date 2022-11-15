@@ -394,7 +394,27 @@ def info(pathway):
                                     print(str(number)+' OCV data file is empty and therefore disregarded.')
                 
                                 counter += 1
-
+                                
+                elif technique == 'CP':
+                    for file in files:
+                        if 'CP' in file:
+                            number = int(file.split('_CP')[0].split('_')[-1])
+                            if counter == number:
+                                try: 
+                                    mpr_file = BL.MPRfile(info['path']+file)
+                                    df_CP = pd.DataFrame(mpr_file.data)
+                                except NotImplementedError:
+                                    print('Not Implemented Error found in OCV file.')
+                                    counter +=1
+                                    break
+                                                                
+                                if len(df_CP) != 0:
+                                    info['data'][str(number)+' CP'] = df_CP
+                                    print(str(number)+' CP data file added.')
+                                else:
+                                    print(str(number)+' CP data file is empty and therefore disregarded.')
+                
+                                counter += 1
 
                 elif technique == 'GEIS':
                     for file in files:

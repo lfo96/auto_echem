@@ -5,14 +5,14 @@ import numpy as np
 from numpy.lib.nanfunctions import _nanquantile_dispatcher
 
 
-#from auto_echem.general_functions import info
-#from auto_echem.general_functions import tech
-#from auto_echem.general_functions import time_limit
-#from auto_echem.general_functions import color_gradient
-#from auto_echem.general_functions import layout
-#from auto_echem.general_functions import find_nearest
-#from auto_echem.general_functions import change_index
-#from auto_echem.GCPL_functions import cy_index
+from auto_echem.general_functions import info
+from auto_echem.general_functions import tech
+from auto_echem.general_functions import time_limit
+from auto_echem.general_functions import color_gradient
+from auto_echem.general_functions import layout
+from auto_echem.general_functions import find_nearest
+from auto_echem.general_functions import change_index
+from auto_echem.GCPL_functions import cy_index
 
 
 from impedance.preprocessing import ignoreBelowX

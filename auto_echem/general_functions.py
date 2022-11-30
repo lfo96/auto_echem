@@ -31,7 +31,7 @@ def datetime_lfo(time_raw):
     start_dt = dt.datetime.strptime("00:00:00", '%H:%M:%S')
     time = time_raw.split('.')[0]
     #time_float = float('{:0.3f}'.format((convert_time(time) - start_dt).seconds/3600))
-    time_float = float((convert_time(time) - start_dt).total_seconds())
+    time_float = float((convert_time(time) - start_dt).total_seconds()/3600)
     return(time_float)
 
 def convert_time(time_str):

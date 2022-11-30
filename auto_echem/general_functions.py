@@ -30,11 +30,30 @@ def datetime(time_raw):
     
     start_dt = dt.datetime.strptime("00:00:00", '%H:%M:%S')
     time = time_raw.split('.')[0]
-    time_float = float('{:0.3f}'.format((dt.datetime.strptime(time, '%H:%M:%S') - start_dt).seconds/3600))
+    time_float = float('{:0.3f}'.format((convert_time(time) - start_dt).seconds/3600))
     
     return(time_float)
 
-
+def convert_time(time_str):
+    '''
+    Converting the time string extracted from the .mps file into a dt.datetime format. Bit weird ...
+    '''
+    try:
+        dt_timeform = dt.datetime.strptime(time_str, '%H:%M:%S')
+    except ValueError:
+        #h_remain = int(time_str.split(':')[0])-23
+        hours_int = int(time_str.split(':')[0])
+        d_remain = int(hours_int/23)-1
+        h_remain = hours_int%23
+        
+        time_str_new = '23'+time_str[2:]
+        time_1 = dt.datetime.strptime(time_str_new, '%H:%M:%S')
+        #time_2 = dt.datetime.strptime(str(days)+':'+str(h_remain)+':00:00', '%d:%H:%M:%S')
+        time_2 = dt.timedelta(days = d_remain, hours=h_remain)
+        dt_timeform = time_1+time_2
+        print('yep')
+                                      
+    return(dt_timeform)
 
 def find_nearest(array, value):
     '''

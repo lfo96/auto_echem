@@ -23,7 +23,7 @@ coolors_1 = ['#052F5F','#005377','#06A77D','#D5C67A','#F1A208']
 #colors_II = ['#A0B1BA','#A6761D']
 
 
-def datetime(time_raw):
+def datetime_lfo(time_raw):
     '''
     Transforms a time format of h:m:s into hours as float
     '''
@@ -276,23 +276,23 @@ def meta(filename):
             elif line.split(":")[0]== 'td (h':
                 if np.isnan(t_wait) == False:
                     print('Several waiting times found.')
-                    t_wait_2 = datetime(line.split(" ")[11])
-                t_wait = datetime(line.split(" ")[11])
+                    t_wait_2 = datetime_lfo(line.split(" ")[11])
+                t_wait = datetime_lfo(line.split(" ")[11])
             elif line.split(":")[0]== 'tR (h':
                 # GCPL and OCV both have a tR entry in the meta file. Necessary to distinguish both
                 if techniques[-1] == 'GCPL':
                     t_GCPL = []
                     for entry in line.split('        '):
                         try:
-                            t_GCPL.append(datetime(entry.strip()))
+                            t_GCPL.append(datetime_lfo(entry.strip()))
                         except ValueError:
                             pass
                     
                 else:
                     if np.isnan(t_wait) == False:
                         print('Several waiting times found.')
-                        t_wait_2 = datetime(line.split(" ")[11])
-                    t_wait = datetime(line.split(" ")[11])
+                        t_wait_2 = datetime_lfo(line.split(" ")[11])
+                    t_wait = datetime_lfo(line.split(" ")[11])
             elif line[0:9]=='ctrl_type':
                 # Add all the techniques from the MB setting to techniques list.
                 MB_tech = line[9:].split(' ')

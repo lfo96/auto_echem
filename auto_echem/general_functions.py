@@ -43,7 +43,7 @@ def convert_time(time_str):
     except ValueError:
         #h_remain = int(time_str.split(':')[0])-23
         hours_int = int(time_str.split(':')[0])
-        d_remain = int(hours_int/23)-1
+        d_remain = int(hours_int/23)
         h_remain = hours_int%23
         
         time_str_new = '23'+time_str[2:]

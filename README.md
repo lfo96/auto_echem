@@ -1,8 +1,8 @@
 # auto_echem
 Processing and analysis script for electrochemical data. 
 
-git clone git@github.com:lfo96/auto_echem.git
-cd/auto_echem
+Either download the package locally and run the setup.py which will install all necessary requirements (also for EIS analysis, etc) or pip install the package (which requires git installed on your computer).
 
+Regular updates are coming so make sure to keep your respo updated! 
 
-more description to come...
+(So far only runs with windows OS)

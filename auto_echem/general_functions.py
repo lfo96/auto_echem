@@ -30,8 +30,8 @@ def datetime_lfo(time_raw):
     
     start_dt = dt.datetime.strptime("00:00:00", '%H:%M:%S')
     time = time_raw.split('.')[0]
-    time_float = float('{:0.3f}'.format((convert_time(time) - start_dt).seconds/3600))
-    
+    #time_float = float('{:0.3f}'.format((convert_time(time) - start_dt).seconds/3600))
+    time_float = float((convert_time(time) - start_dt).total_seconds())
     return(time_float)
 
 def convert_time(time_str):
@@ -50,9 +50,7 @@ def convert_time(time_str):
         time_1 = dt.datetime.strptime(time_str_new, '%H:%M:%S')
         #time_2 = dt.datetime.strptime(str(days)+':'+str(h_remain)+':00:00', '%d:%H:%M:%S')
         time_2 = dt.timedelta(days = d_remain, hours=h_remain)
-        dt_timeform = time_1+time_2
-        print('yep')
-                                      
+        dt_timeform = time_1+time_2                                     
     return(dt_timeform)
 
 def find_nearest(array, value):

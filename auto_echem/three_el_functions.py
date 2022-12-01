@@ -5,15 +5,15 @@ from numpy.lib.nanfunctions import _nanquantile_dispatcher
 from scipy.integrate import simps
 import pandas as pd
 
-#from auto_echem.general_functions import info
-#from auto_echem.general_functions import loop_finder
-#from auto_echem.general_functions import tech
-#from auto_echem.general_functions import time_limit
-#from auto_echem.general_functions import color_gradient
-#from auto_echem.general_functions import layout
-#from auto_echem.general_functions import find_nearest
-#from auto_echem.general_functions import calc_I
-#from auto_echem.impedance_functions import eva_PEIS
+from auto_echem.general_functions import info
+from auto_echem.general_functions import loop_finder
+from auto_echem.general_functions import tech
+from auto_echem.general_functions import time_limit
+from auto_echem.general_functions import color_gradient
+from auto_echem.general_functions import layout
+from auto_echem.general_functions import find_nearest
+from auto_echem.general_functions import calc_I
+from auto_echem.impedance_functions import eva_PEIS
 
 from impedance.preprocessing import ignoreBelowX
 from impedance.models.circuits  import *

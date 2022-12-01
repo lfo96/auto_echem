@@ -22,6 +22,25 @@ colors = ['#FF1F5B','#00CD6C','#009ADE','#AF58BA','#FFC61E','#F28522','#A0B1BA',
 coolors_1 = ['#052F5F','#005377','#06A77D','#D5C67A','#F1A208']
 #colors_II = ['#A0B1BA','#A6761D']
 
+from numpy import diff
+def x_der(array):
+    '''
+    insert array of numbers. Returns an array with all the values in between each value.
+    ''' 
+    x_mean = []
+    i_0 = array.iloc[0]
+    for i in array[1:]:
+        mean = (i+i_0)/2
+        x_mean.append(mean)
+        i_0 = i
+    return(x_mean)
+
+def derive(x,y):
+    dydx = diff(y)/diff(x)
+    x_mean = x_der(x)
+    return(x_mean,dydx)
+
+
 
 def datetime_lfo(time_raw):
     '''

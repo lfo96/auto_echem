@@ -386,7 +386,7 @@ def fit(freq,Re,Im,circ = "",fit_counter = 0, ignore_posIm=True):
     elif circ=='p(RCC-W)':
         #if fit_counter == 0:
         
-        initial_guess = [.01, 20, .000001, .001, .05, 100]
+        initial_guess = [.01, 20, .000001, .000001, .05, 100]
         circuit = CustomCircuit(initial_guess = [.01, 20, .000001, .001, .05, 100], circuit = 'R0-p(R1,C1,C2-Wo1)')
         circuit.fit(f,Z)
     

@@ -382,6 +382,13 @@ def fit(freq,Re,Im,circ = "",fit_counter = 0, ignore_posIm=True):
         #if fit_counter == 0:
         circuit = CustomCircuit(initial_guess=[5, 20, .000001, .85, 40, .000001, .85, 40, .000001, .85], circuit='R_0-p(R1,CPE1)-p(R2,CPE2)-p(R3,CPE3)')
         circuit.fit(f,Z)
+        
+    elif circ=='p(RCC-W)':
+        #if fit_counter == 0:
+        
+        initial_guess = [.01, 20, .000001, .001, .05, 100]
+        circuit = CustomCircuit(initial_guess = [.01, 20, .000001, .001, .05, 100], circuit = 'R0-p(R1,C1,C2-Wo1)')
+        circuit.fit(f,Z)
     
     else:
         print(str(circ)+' is not defined.')

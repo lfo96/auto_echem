@@ -13,7 +13,6 @@ from auto_echem.general_functions import data_set
 from auto_echem.general_functions import color_gradient
 
 
-#from Python_scripts.neware_reader_master.neware import *
 # from .neware_reader_master.neware import *
 from scipy.integrate import simps
 

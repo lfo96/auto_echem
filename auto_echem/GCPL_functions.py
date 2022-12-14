@@ -826,23 +826,23 @@ def color_gradient(increments, style = cm.viridis):
     return (colors)     
 
 import matplotlib as mpl
-def DQDV(file_eva,cycles,gradient_len='', save = '', x_lim = "", y_lim = ""):
+def DQDV(file_eva,cy,gradient_len='', save = '', x_lim = "", y_lim = ""):
     '''
     PLot DQDV plot. Insert the ['eva']['X GCPL][1] file.
     '''
     if gradient_len!='':
         gradient_len = gradient_len
     else:
-       gradient_len = cycles[-1]+1
+       gradient_len = cy[-1]+1
     color = color_gradient(gradient_len)
     fig, ax = plt.subplots()
 
     print(cycles[-1])
-    for i,cy in enumerate(cycles):
-        derivation = derive(file_eva[cy]['Discharge Potential (V)'],file_eva[cy]['Gravimetric Discharge Capacity (mAh/g)'])
-        ax.plot(derivation[0][1:-1],derivation[1][1:-1], color = color[cy],linewidth=3)
-        derivation = derive(file_eva[cy]['Charge Potential (V)'],file_eva[cy]['Gravimetric Charge Capacity (mAh/g)'])
-        ax.plot(derivation[0][1:-1],derivation[1][1:-1], color = color[cy],linewidth=3)
+    for i,cy_i in enumerate(cy):
+        derivation = derive(file_eva[cy_i]['Discharge Potential (V)'],file_eva[cy_i]['Gravimetric Discharge Capacity (mAh/g)'])
+        ax.plot(derivation[0][1:-1],derivation[1][1:-1], color = color[cy_i],linewidth=3)
+        derivation = derive(file_eva[cy_i]['Charge Potential (V)'],file_eva[cy_i]['Gravimetric Charge Capacity (mAh/g)'])
+        ax.plot(derivation[0][1:-1],derivation[1][1:-1], color = color[cy_i],linewidth=3)
 
     cmap = cm.viridis # this is the colormap used to display the spectrogram
     norm = mpl.colors.Normalize(vmin=0, vmax=gradient_len) # these are the min and max values from the spectrogram

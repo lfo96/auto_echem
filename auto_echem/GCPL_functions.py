@@ -799,4 +799,50 @@ def OSCAR_data_logging(ID):
     meta_data_ID = meta_data_logging.iloc[index]
     #meta_data_ID = meta_data_logging.loc[meta_data_logging['ID']==ID]
     return(meta_data_ID)
-    
+
+from numpy import diff
+def x_der(array):
+    '''
+    insert array of numbers. Returns an array with all the values in between each value.
+    ''' 
+    x_mean = []
+    i_0 = array.iloc[0]
+    for i in array[1:]:
+        mean = (i+i_0)/2
+        x_mean.append(mean)
+        i_0 = i
+    return(x_mean)
+
+def derive(x,y):
+    dydx = diff(y)/diff(x)
+    x_mean = x_der(x)
+    return(x_mean,dydx)
+
+
+import matplotlib as mpl
+def DQDV(file_eva,cycles,gradient_len='', save = '', x_lim = "", y_lim = ""):
+    '''
+    PLot DQDV plot. Insert the ['eva']['X GCPL][1] file.
+    '''
+    if gradient_len!='':
+        gradient_len = gradient_len
+    else:
+       gradient_len = cycles[-1]+1
+    color = color_gradient(gradient_len)
+    fig, ax = plt.subplots()
+
+    print(cycles[-1])
+    for i,cy in enumerate(cycles):
+        derivation = derive(file_eva[cy]['Discharge Potential (V)'],file_eva[cy]['Gravimetric Discharge Capacity (mAh/g)'])
+        ax.plot(derivation[0][1:-1],derivation[1][1:-1], color = color[cy],linewidth=3)
+        derivation = derive(file_eva[cy]['Charge Potential (V)'],file_eva[cy]['Gravimetric Charge Capacity (mAh/g)'])
+        ax.plot(derivation[0][1:-1],derivation[1][1:-1], color = color[cy],linewidth=3)
+
+    cmap = cm.viridis # this is the colormap used to display the spectrogram
+    norm = mpl.colors.Normalize(vmin=0, vmax=gradient_len) # these are the min and max values from the spectrogram
+
+    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label = 'Cycle Number' )
+
+    layout(ax, y_label = r'DQ vs DV ($\mathregular{mAh\,g^{-1}\,V^{-1}}$)', x_label = r'$\mathregular{E\ (V\ vs\ Li^+/Li)}$', size = [8,4], x_lim = x_lim, y_lim = y_lim)
+    if save != '':
+        plt.savefig(str(save)+'.svg', transparent = True, bbox_inches = 'tight')

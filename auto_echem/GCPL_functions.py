@@ -10,7 +10,7 @@ from auto_echem.general_functions import info
 from auto_echem.general_functions import layout
 from auto_echem.general_functions import isclose
 from auto_echem.general_functions import data_set
-from auto_echem.general_functions import color_gradient
+
 
 
 # from .neware_reader_master.neware import *
@@ -819,6 +819,10 @@ def derive(x,y):
     x_mean = x_der(x)
     return(x_mean,dydx)
 
+def color_gradient(increments, style = cm.viridis):
+    cm_subsection = np.linspace(0, 1, increments)
+    colors = [ style(x) for x in cm_subsection ]
+    return (colors)     
 
 import matplotlib as mpl
 def DQDV(file_eva,cycles,gradient_len='', save = '', x_lim = "", y_lim = ""):

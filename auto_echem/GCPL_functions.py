@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import datetime
+from matplotlib import cm
 # import gspread
 
 from auto_echem.general_functions import info

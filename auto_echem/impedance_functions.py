@@ -654,7 +654,7 @@ def plot_GEIS(data_set, A_el, save = ''):
         plt.savefig(save+'.svg', transparent = True)
 
 
-def EIS_CE(data,sequence,circ='Rp',ind=True, fit_counter = 0,lf_limit = ''):
+def EIS_CE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ind=False, fit_counter = 0):
     '''
     Insert data in form of evaluated 3-El data with the eva_threeEl(pathway) function.
     Specify the sequence where the PEIS data is stored.
@@ -739,7 +739,7 @@ def EIS_CE(data,sequence,circ='Rp',ind=True, fit_counter = 0,lf_limit = ''):
     }
     return(d)
 
-def EIS_WE(data,sequence,circ='Rp',lf_limit='', fit_counter = 0,ignore_posIm=True):
+def EIS_WE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ignore_posIm=True):
     '''
     Insert data in form of evaluated 3-El data with the eva_threeEl(pathway) function.
     Specify the sequence where the PEIS data is stored.
@@ -752,8 +752,6 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='', fit_counter = 0,ignore_posIm=Tru
     Nyn_fit = []
     circuit_elements = []
     circuit_values = []
-    #parameter = []
-    #data_fit = []
     fig, ax = plt.subplots()
     colors = color_gradient(len(data['data'][sequence]))
 
@@ -761,12 +759,6 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='', fit_counter = 0,ignore_posIm=Tru
         freq = np.array(data['data'][sequence][cy][0])
         Re = data['data'][sequence][cy][1]
         Im = data['data'][sequence][cy][2]
-
-        #Re_CE = data['data'][sequence][cy][-1][0]
-        #Im_CE = data['data'][sequence][cy][-1][1]
-
-        #Re_dif = data['data'][sequence][cy][-1][2]
-        #Im_dif = data['data'][sequence][cy][-1][3]
 
         if lf_limit != '':
             '''
@@ -779,14 +771,23 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='', fit_counter = 0,ignore_posIm=Tru
                 Im = Im[0:lf_index]
             except IndexError:
                 pass
+        if hf_limit != '':
+            '''
+            Cancel out the low frequency values. 
+            '''
+            try :
+                hf_index = np.argwhere(np.array(freq)>hf_limit)[-1][0]
+                freq = freq[hf_index:-1]
+                Re = Re[hf_index:-1]
+                Im = Im[hf_index:-1]
+            except IndexError:
+                pass
 
-
+        
+        
         fitted = fit(freq,Re,Im, circ = circ, fit_counter = fit_counter,ignore_posIm=ignore_posIm)
         f_pred = np.geomspace(freq[0],freq[-1])
         omegas = omega_max(fitted[0].get_param_names(),fitted[0].parameters_.tolist(),-fitted[1].imag,f_pred)
-
-        #Im_fit = -fitted[1].imag
-        #Re_fit = fitted[1].real
 
         elements = omegas[0]
         values = omegas[1]
@@ -798,18 +799,8 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='', fit_counter = 0,ignore_posIm=Tru
         fit_imag = -fitted[1].imag
         Nyn_fit.append([f_pred,fit_real,fit_imag.tolist()])
 
-        #data_fit.append([freq,Re_fit,Im_fit])
-        #parameter.append(omegas)
-        #print(str(cy)+' cycle evaluated.')
-        
-        #plt.scatter(Re,Im, label = 'WE', color = 'tab:red')
         plt.scatter(Re,Im, color = colors[cy])
         plt.plot(fit_real,fit_imag, color = colors[cy])
-        #plt.scatter(Re_dif,Im_dif, label = 'tot', color = 'tab:green')
-
-        #print(omegas[0][0][0]+': '+str(omegas[1][0]))
-        #print(omegas[0][0][1]+': '+str(omegas[1][1]))
-        #print(omegas[0][0][2]+': '+str(omegas[1][2]))
 
     eva_PEIS = (Nyn_exp,Nyn_fit,circuit_elements,circuit_values)
     data_para = parameter(eva_PEIS)
@@ -819,3 +810,4 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='', fit_counter = 0,ignore_posIm=Tru
         'Nyquist parameter' : data_para,
     }
     return(d)
+

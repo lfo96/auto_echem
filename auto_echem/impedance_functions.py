@@ -654,11 +654,11 @@ def plot_GEIS(data_set, A_el, save = ''):
         plt.savefig(save+'.svg', transparent = True)
 
 
-def EIS_CE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ind=False, fit_counter = 0):
+def EIS_CE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ind=False):
     '''
     Insert data in form of evaluated 3-El data with the eva_threeEl(pathway) function.
     Specify the sequence where the PEIS data is stored.
-    Specify the circuit used for fitting.
+    Specify the circuit used for fitting.git
     Ind = True means it neglects all measurement points where the imaginary part turns postive (and subsequent ones, i.e. higher frequencies).
     '''
     Nyn_exp = []

@@ -6,21 +6,30 @@ import numpy as np
 import datetime as dt
 
 from itertools import islice
-#from auto_echem.general_functions import layout
+from auto_echem.general_functions import layout
 
 def TGA_DSC(pathway, plot = True, save = '', x_lim='', y_lim ='', y2_lim = '', m_real = ''):
+#pathway = FSI_p
     with open(pathway,encoding= 'unicode_escape') as fin:
-        head_len = 34
-        for line in islice(fin, 0,head_len):
+        header = 50
+        head_len = 0
+        for line in islice(fin, 0,header):
                 #print(line.split(":")[0])
                 if line.split(":")[0]=="#SAMPLE MASS /mg": #extract the active material mass
                     m_am = float(line.split(",")[1][0:5])
-    
-    df = pd.read_csv(pathway,encoding= 'unicode_escape', header=34)
-    df['Mass loss (mg)'] = ((df['Mass/%'].iloc[0]-df['Mass/%'])/100)*m_am*-1
+                if line[0:2] == '##':
+                    break
+                head_len += 1
+
+    df = pd.read_csv(pathway,encoding= 'unicode_escape', header=head_len-1)
+    try:
+        df['Mass loss (mg)'] = ((df['Mass/%'].iloc[0]-df['Mass/%'])/100)*m_am*-1
+        df['DSC/uV'] = df['DSC/(uV/mg)']*m_am
+    except KeyError:
+        print('Blank measurement found.')
+        df['Mass/%'] = 100*df['Mass loss/mg']/df['Mass loss/mg'].iloc[0]
     if m_real != '':
         df['Mass corrected (%)'] = 100-((df['Mass loss (mg)']/m_real)*-100)
-    
 
     meta = {
         'sample mass' : m_am,

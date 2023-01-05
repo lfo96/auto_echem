@@ -70,7 +70,10 @@ def plot_TGA_DSC(data, save = '', correction = False, x_lim= '', y_lim = '', y2_
     figure = plt.gca()
     y_axis = figure.axes.get_yaxis()
     y_axis.set_visible(False)
-    ax2.plot(data['##Temp./C'],data['DSC/(uV/mg)']*-1, color = color_ax2)
+    try: 
+        ax2.plot(data['##Temp./C'],data['DSC/(uV/mg)']*-1, color = color_ax2)
+    except KeyError:
+        print('No DSC file found.')
     if y2_lim == '':
         layout(ax2)
     else:

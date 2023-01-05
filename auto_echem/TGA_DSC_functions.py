@@ -9,7 +9,6 @@ from itertools import islice
 from auto_echem.general_functions import layout
 
 def TGA_DSC(pathway, plot = True, save = '', x_lim='', y_lim ='', y2_lim = '', m_real = ''):
-#pathway = FSI_p
     with open(pathway,encoding= 'unicode_escape') as fin:
         header = 50
         head_len = 0
@@ -81,5 +80,6 @@ def plot_TGA_DSC(data, save = '', correction = False, x_lim= '', y_lim = '', y2_
     if save != '':
         plt.savefig(save+'.svg')
     layout(ax2)
-    
+
+
 

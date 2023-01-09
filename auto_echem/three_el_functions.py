@@ -189,7 +189,7 @@ def cy_index(GCPL):
     return(start,end)
 
 
-def plot_GCPL(dis_data, dis_index, cha_data, cha_index, m_am, electrode = 'Ewe/V', save = '', x_lim = '', y_lim = ''):
+def plot_GCPL(dis_data, dis_index, cha_data, cha_index, m_am, electrode = 'Ewe/V', save = '', x_lim = '', y_lim = '', cy = []):
     '''
     Plot the GCPL corresponding to a three electrode measurement. 
     Insert data in the dictionary form of the threeEl function, the start and end points of the charging cycles obtained by the cy_index function, and specify the electrode system to be plotted.
@@ -198,18 +198,27 @@ def plot_GCPL(dis_data, dis_index, cha_data, cha_index, m_am, electrode = 'Ewe/V
     cycle = 1
     colors = color_gradient(len(dis_index[0]))
     fig, ax = plt.subplots()
-    for i in range(len(dis_index[0])): 
-        plt.plot(abs(dis_data.loc[dis_data['control/V/mA']!= 0].loc[dis_index[0][i]:dis_index[1][i]]['(Q-Qo)/mA.h'])/(0.001*m_am),dis_data.loc[dis_data['control/V/mA']!= 0].loc[dis_index[0][i]:dis_index[1][i]][electrode], color = colors[i])#, label = str(cycle)+". cycle")
+    if len(cy)!=0:
+        colors = color_gradient(len(cy))
+        cy_count = 0
+        for i in range(len(dis_index[0])): 
+            if cycle in cy:
+                plt.plot(abs(dis_data.loc[dis_data['control/V/mA']!= 0].loc[dis_index[0][i]:dis_index[1][i]]['(Q-Qo)/mA.h'])/(0.001*m_am),dis_data.loc[dis_data['control/V/mA']!= 0].loc[dis_index[0][i]:dis_index[1][i]][electrode], color = colors[cy_count], label = str(cycle)+". cycle")
+                plt.plot(abs(cha_data.loc[cha_data['control/V/mA']!= 0].loc[cha_index[0][i]:cha_index[1][i]]['(Q-Qo)/mA.h'])/(0.001*m_am),cha_data.loc[cha_data['control/V/mA']!= 0].loc[cha_index[0][i]:cha_index[1][i]][electrode], color = colors[cy_count])
+                cy_count+=1
+            cycle += 1
+    else:     
+        for i in range(len(dis_index[0])): 
+            plt.plot(abs(dis_data.loc[dis_data['control/V/mA']!= 0].loc[dis_index[0][i]:dis_index[1][i]]['(Q-Qo)/mA.h'])/(0.001*m_am),dis_data.loc[dis_data['control/V/mA']!= 0].loc[dis_index[0][i]:dis_index[1][i]][electrode], color = colors[i])#, label = str(cycle)+". cycle")
 
-        try:
-            plt.plot(abs(cha_data.loc[cha_data['control/V/mA']!= 0].loc[cha_index[0][i]:cha_index[1][i]]['(Q-Qo)/mA.h'])/(0.001*m_am),cha_data.loc[cha_data['control/V/mA']!= 0].loc[cha_index[0][i]:cha_index[1][i]][electrode], color = colors[i])
-        except IndexError:
-            break
-        cycle += 1
+            try:
+                plt.plot(abs(cha_data.loc[cha_data['control/V/mA']!= 0].loc[cha_index[0][i]:cha_index[1][i]]['(Q-Qo)/mA.h'])/(0.001*m_am),cha_data.loc[cha_data['control/V/mA']!= 0].loc[cha_index[0][i]:cha_index[1][i]][electrode], color = colors[i])
+            except IndexError:
+                break
+            cycle += 1
     layout(ax, x_label = r'Gravimetric Capacity ($\mathregular{mAh\,g^{-1}}$)', y_label = r'$\mathregular{E\ (V\ vs\ Li^+/Li)}$', x_lim = x_lim, y_lim = y_lim, title = electrode)
     if save != '':
         plt.savefig(save+'.svg',bbox_inches='tight', transparent = True)
-        
         
 
 def eva_potstat(galv):

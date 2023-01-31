@@ -4,6 +4,8 @@ import cmath
 import numpy as np
 from numpy.lib.nanfunctions import _nanquantile_dispatcher
 from contextlib import contextmanager
+import threading
+import _thread
 
 from auto_echem.general_functions import info
 from auto_echem.general_functions import tech

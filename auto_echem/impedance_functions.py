@@ -3,7 +3,7 @@ import cmath
 # from altair.vegalite.v4.api import value
 import numpy as np
 from numpy.lib.nanfunctions import _nanquantile_dispatcher
-
+from contextlib import contextmanager
 
 from auto_echem.general_functions import info
 from auto_echem.general_functions import tech
@@ -739,7 +739,11 @@ def EIS_CE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ind=
     }
     return(d)
 
+class TimeoutException(Exception):
+    def __init__(self, msg=''):
+        self.msg = msg
 
+@contextmanager
 def time_limit(seconds, msg=''):
     timer = threading.Timer(seconds, lambda: _thread.interrupt_main())
     timer.start()

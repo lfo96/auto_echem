@@ -212,6 +212,38 @@ def layout_zoom(ax,x_axis = True, y_axis = True, x_label = "", y_label = "", tit
 
     return(ax)
 
+def layout_poster(ax,x_label = "", y_label = "", title = "",  x_lim = "", y_lim = "", square = "", size = []):
+    """
+    Update plot layout to a standard format.
+    Insert ax from matplotlib, x_label, and y_label description and a title.
+    """
+    
+    ax.set_title(title,fontsize = 20)
+    ax.set_xlabel(x_label,fontsize = 24)
+    ax.set_ylabel(y_label,fontsize = 24)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.legend(loc="best",frameon = False, fontsize = 24)
+    ax.tick_params(direction='in', length=8, width=3)
+    for axis in ['top','bottom','left','right']:
+        ax.spines[axis].set_linewidth(3)
+        
+    if x_lim != "":
+        plt.xlim(x_lim)
+    if y_lim != "":
+        plt.ylim(y_lim)
+    if square != "":
+        plt.gca().set_aspect('equal', adjustable='box')
+    if len(size)!=0:
+        try:
+            fig = plt.gcf()
+            fig.set_size_inches(size[0], size[1])
+        except IndexError:
+            print('Please specify size of the figure in inches size = [lenght, height].')
+            pass
+
+    return(ax)
+
 
 def manual_header(filename):
     with open(filename,encoding= 'ISO-8859-1') as fin:

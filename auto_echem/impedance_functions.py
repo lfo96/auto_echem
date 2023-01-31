@@ -739,6 +739,18 @@ def EIS_CE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ind=
     }
     return(d)
 
+@contextmanager
+def time_limit(seconds, msg=''):
+    timer = threading.Timer(seconds, lambda: _thread.interrupt_main())
+    timer.start()
+    try:
+        yield
+    except KeyboardInterrupt:
+        raise TimeoutException("Timed out for operation {}".format(msg))
+    finally:
+        # if the action ends in specified time, timer is canceled
+        timer.cancel()
+        
 def EIS_WE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ignore_posIm=True):
     '''
     Insert data in form of evaluated 3-El data with the eva_threeEl(pathway) function.
@@ -754,7 +766,7 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,igno
     circuit_values = []
     fig, ax = plt.subplots()
     colors = color_gradient(len(data['data'][sequence]))
-
+    counter = 0
     for cy in range(len(data['data'][sequence])):
         freq = np.array(data['data'][sequence][cy][0])
         Re = data['data'][sequence][cy][1]
@@ -784,24 +796,39 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,igno
                 pass
 
         
-        
-        fitted = fit(freq,Re,Im, circ = circ, fit_counter = fit_counter,ignore_posIm=ignore_posIm)
-        f_pred = np.geomspace(freq[0],freq[-1])
-        omegas = omega_max(fitted[0].get_param_names(),fitted[0].parameters_.tolist(),-fitted[1].imag,f_pred)
+        with time_limit(15, 'sleep'):
+            try:
+                fitted = fit(freq,Re,Im, circ = circ, fit_counter = fit_counter,ignore_posIm=ignore_posIm)
+                f_pred = np.geomspace(freq[0],freq[-1])
+                omegas = omega_max(fitted[0].get_param_names(),fitted[0].parameters_.tolist(),-fitted[1].imag,f_pred)
 
-        elements = omegas[0]
-        values = omegas[1]
-        circuit_elements.append(elements)
-        circuit_values.append(values)
-        Nyn_exp.append([freq,Re,Im])
-        f_pred = f_pred.tolist()
-        fit_real = fitted[1].real.tolist()
-        fit_imag = -fitted[1].imag
-        Nyn_fit.append([f_pred,fit_real,fit_imag.tolist()])
+                elements = omegas[0]
+                values = omegas[1]
+                circuit_elements.append(elements)
+                circuit_values.append(values)
+                Nyn_exp.append([freq,Re,Im])
+                f_pred = f_pred.tolist()
+                fit_real = fitted[1].real.tolist()
+                fit_imag = -fitted[1].imag
+                Nyn_fit.append([f_pred,fit_real,fit_imag.tolist()])
 
-        plt.scatter(Re,Im, color = colors[cy])
-        plt.plot(fit_real,fit_imag, color = colors[cy])
+                plt.scatter(Re,Im, color = colors[cy])
+                plt.plot(fit_real,fit_imag, color = colors[cy])
 
+            except KeyboardInterrupt:
+                print("cycle "+str(counter)+" fitting timed out.")
+                try:
+                    para_no = len(elements[0])
+                except UnboundLocalError:
+                    para_no = 5
+                lst = []
+                for i in range(para_no):
+                    lst.append(np.nan)
+                circuit_elements.append((lst,lst))
+                circuit_values.append(lst)
+                Nyn_exp.append([entry[0],entry[1],entry[2]])
+                Nyn_fit.append([np.nan, np.nan, np.nan])
+            counter += 1
     eva_PEIS = (Nyn_exp,Nyn_fit,circuit_elements,circuit_values)
     data_para = parameter(eva_PEIS)
     layout(ax, square = True,x_label = 'Re(Z) (Ohm)', y_label = '-Im(Z) (Ohm)')

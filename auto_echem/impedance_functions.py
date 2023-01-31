@@ -739,7 +739,7 @@ def EIS_CE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,ind=
     }
     return(d)
 
-@contextmanager
+
 def time_limit(seconds, msg=''):
     timer = threading.Timer(seconds, lambda: _thread.interrupt_main())
     timer.start()

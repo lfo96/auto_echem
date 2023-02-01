@@ -30,7 +30,8 @@ def eva_XPS(pathway):
         areas = {}
         name = spectrum.columns[1]
         cycle = name.split(':')[0]
-        element = name.split(':')[3]
+        #element = name.split(':')[3] more general is -2
+        element = name.split(':')[-2]
         BE = spectrum[spectrum.columns[0]]
         raw = spectrum[spectrum.columns[1]]
         raw_norm =  spectrum[spectrum.columns[1]]/spectrum[spectrum.columns[1]].max()

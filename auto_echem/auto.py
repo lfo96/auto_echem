@@ -34,7 +34,7 @@ from auto_echem.GCPL_functions import cy_index
 
 
 
-def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_para = 0, cy = [1,2,5,10,20,30,50],l=0.14, r_cc=5, PEIS_evaluation = True, lf_limit='',clear_output = False):
+def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_para = 0, cy = [1,2,5,10,20,30,50],l=0.14, r_cc=5, PEIS_evaluation = True, lf_limit='',clear_cell = False):
     '''
     Automatically detect and analysis the measurements produced by EC-lab.
     Insert pathway with EC-lab settings file (.mps)
@@ -299,7 +299,7 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                     strip_plate(df_cc, title = str(I_cc_areal)+' $\mathregular{mA\,cm^{-2}}$')
             
     meta['eva'] = d_eva
-    if clear_output==True:
+    if clear_cell==True:
         clear_output(wait=False)
 
     return(meta)

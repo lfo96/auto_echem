@@ -288,12 +288,12 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 op_last = []
                 op_first = []
                 
-                cy_in = cy_index(data)
+                cy_in = cy_index(df_cc)
                 
                 for i in cy_in[0]:
-                    op_first.append(data['Ewe/V'].loc[i])
+                    op_first.append(df_cc['Ewe/V'].loc[i])
                 for i in cy_in[1]:
-                    op_last.append(data['Ewe/V'].loc[i])
+                    op_last.append(df_cc['Ewe/V'].loc[i])
 
                 if isclose(abs(cc_switch[0][1]),abs(cc_switch[1][1])) is True:
                     I_cc_areal = (abs(cc_switch[0][1])+abs(cc_switch[1][1]))/2

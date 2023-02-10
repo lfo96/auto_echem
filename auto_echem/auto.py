@@ -261,12 +261,19 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
             elif I_area >=0:
                 cc_switch[1] = (entry,I_area)
 
-            op = []
+            op_last = []
+            op_first = []
+            
             cy_in = cy_index(data)
+            
+            for i in cy_in[0]:
+                op_first.append(data['Ewe/V'].loc[i])
             for i in cy_in[1]:
-                op.append(data['Ewe/V'].loc[i])
+                op_last.append(data['Ewe/V'].loc[i])
+                
             print(entry + ' evaluated.')
-            d['over potential (V)'] = op
+            d['over potential first (V)'] = op_first
+            d['over potential last (V)'] = op_last
             d['areal current (mA/cm2)'] = I_area
 
             d_eva[entry] = d
@@ -278,10 +285,15 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 d_cc = {}
                 ID = 'CC_'+str(cc_switch[0][0].split(' ')[0])+'_'+str(cc_switch[1][0].split(' ')[0])
                 df_cc = pd.concat([meta['data'][cc_switch[0][0]], meta['data'][cc_switch[1][0]]], sort=False).sort_index()
-                op = []
-                cy_in = cy_index(df_cc)
+                op_last = []
+                op_first = []
+                
+                cy_in = cy_index(data)
+                
+                for i in cy_in[0]:
+                    op_first.append(data['Ewe/V'].loc[i])
                 for i in cy_in[1]:
-                    op.append(df_cc['Ewe/V'].loc[i])
+                    op_last.append(data['Ewe/V'].loc[i])
 
                 if isclose(abs(cc_switch[0][1]),abs(cc_switch[1][1])) is True:
                     I_cc_areal = (abs(cc_switch[0][1])+abs(cc_switch[1][1]))/2
@@ -291,7 +303,8 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
 
                 d_cc['Areal Current (mA/cm2)'] = I_cc_areal
                 d_cc['df'] = df_cc
-                d_cc['over potential (V)'] = op
+                d_cc['over potential first (V)'] = op_first
+                d_cc['over potential last (V)'] = op_last
                 d_eva[ID] = d_cc
                 meta['eva'] = d_eva
                 cc_switch = [False,False]

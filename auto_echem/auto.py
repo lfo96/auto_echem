@@ -291,7 +291,7 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 cy_in = cy_index(df_cc)
                 
                 for i in cy_in[0]:
-                    op_first.append(df_cc['Ewe/V'].loc[i+1])
+                    op_first.append(df_cc['Ewe/V'].loc[i])
                 for i in cy_in[1]:
                     op_last.append(df_cc['Ewe/V'].loc[i])
 

@@ -102,7 +102,7 @@ def eva_PEIS(df):
 
     return(data_PEIS)
 
-def Nynquist(raw,circ="", fit_para = 0,lf_limit = '',hf_limit = ''):
+def Nyquist(raw,circ="", fit_para = 0,lf_limit = '',hf_limit = ''):
     '''
     Insert the raw PEIS data and a suitable circuit. Returns a list of the experimental and fitted Nynquist plot and a list of all corresponding charge transfer resistances.
     '''

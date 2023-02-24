@@ -19,7 +19,7 @@ from auto_echem.general_functions import LSV_cond
 from auto_echem.general_functions import layout
 from auto_echem.general_functions import isclose
 
-from auto_echem.impedance_functions import Nynquist
+from auto_echem.impedance_functions import Nyquist
 from auto_echem.impedance_functions import parameter
 from auto_echem.impedance_functions import plot_PEIS
 from auto_echem.impedance_functions import plot_R
@@ -34,7 +34,7 @@ from auto_echem.GCPL_functions import cy_index
 
 
 
-def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_para = 0, cy = [1,2,5,10,20,30,50],l=0.14, r_cc=5, PEIS_evaluation = True, lf_limit='',clear_cell = False):
+def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_para = 0, cy = [1,2,5,10,20,30,50],l=0.14, r_cc=5, PEIS_evaluation = True, lf_limit='',hf_limit = '',clear_cell = False):
     '''
     Automatically detect and analysis the measurements produced by EC-lab.
     Insert pathway with EC-lab settings file (.mps)
@@ -96,7 +96,7 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 if plot =='':
                     plot_PEIS([[meta['data'][entry]['freq/Hz'],meta['data'][entry]['Re(Z)/Ohm'],meta['data'][entry]['-Im(Z)/Ohm']]], tit = meta['filename'])
                 break
-            data_eva = Nynquist(meta['data'][entry], circ = circ[circ_count], fit_para = fit_para,lf_limit=lf_limit)
+            data_eva = Nyquist(meta['data'][entry], circ = circ[circ_count], fit_para = fit_para,lf_limit=lf_limit,hf_limit=hf_limit)
             d['Nyquist data'] = data_eva
                         
             try:
@@ -190,7 +190,7 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                     plot_PEIS([[meta['data'][entry]['freq/Hz'],meta['data'][entry]['Re(Z)/Ohm'],meta['data'][entry]['-Im(Z)/Ohm']]], tit = meta['filename'])
                 break
 
-            data_eva = Nynquist(meta['data'][entry], circ = circ[circ_count], fit_para = fit_para)
+            data_eva = Nyquist(meta['data'][entry], circ = circ[circ_count], fit_para = fit_para, lf_limit = lf_limit,hf_limit=hf_limit)
             d['Nyquist data'] = data_eva
                         
             try:

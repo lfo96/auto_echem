@@ -102,7 +102,7 @@ def eva_PEIS(df):
 
     return(data_PEIS)
 
-def Nynquist(raw,circ="", fit_para = 0,lf_limit = ''):
+def Nynquist(raw,circ="", fit_para = 0,lf_limit = '',hf_limit = ''):
     '''
     Insert the raw PEIS data and a suitable circuit. Returns a list of the experimental and fitted Nynquist plot and a list of all corresponding charge transfer resistances.
     '''
@@ -131,6 +131,14 @@ def Nynquist(raw,circ="", fit_para = 0,lf_limit = ''):
                             freq = f[0:lf_index]
                             Re = Re[0:lf_index]
                             Im = Im[0:lf_index]
+                        except IndexError:
+                            pass
+                    if hf_limit != '':
+                        try :
+                            hf_index = np.argwhere(np.array(freq)<hf_limit)[0][0]
+                            freq = f[hf_index:]
+                            Re = Re[hf_index:]
+                            Im = Im[hf_index:]
                         except IndexError:
                             pass
                         

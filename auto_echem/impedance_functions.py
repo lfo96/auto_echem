@@ -24,7 +24,7 @@ from scipy.signal import argrelextrema
 
 def parameter(eva):
     '''
-    extract the parameter from the evaluated PEIS data (via Nynquist function) and store them into a dictionary. Assumes a consistent circuit model.  
+    extract the parameter from the evaluated PEIS data (via Nyquist function) and store them into a dictionary. Assumes a consistent circuit model.  
     '''
 
     d = {}
@@ -104,7 +104,7 @@ def eva_PEIS(df):
 
 def Nyquist(raw,circ="", fit_para = 0,lf_limit = '',hf_limit = ''):
     '''
-    Insert the raw PEIS data and a suitable circuit. Returns a list of the experimental and fitted Nynquist plot and a list of all corresponding charge transfer resistances.
+    Insert the raw PEIS data and a suitable circuit. Returns a list of the experimental and fitted Nyquist plot and a list of all corresponding charge transfer resistances.
     '''
     evaluated = eva_PEIS(raw)
     counter = 1
@@ -422,7 +422,7 @@ def PEIS_analysis(pathway, circ = ['cc', 'cc'], plot = '', resttime = 50, save =
             except IndexError:
                 print('Please specify the circuit fit for '+str(entry))
                 continue
-            data_eva = Nynquist(meta['data'][entry], circ = circ[circ_count], fit_para = fit_para)
+            data_eva = Nyquist(meta['data'][entry], circ = circ[circ_count], fit_para = fit_para)
             d['Nyquist data'] = data_eva
                         
             try:

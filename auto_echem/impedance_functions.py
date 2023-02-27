@@ -123,16 +123,16 @@ def Nyquist(raw,circ="", fit_para = 0,lf_limit = 0,hf_limit = math.inf):
             try:
                 try:
                     f = np.array(entry[0])
-                    f_pred = np.geomspace(f[0],f[-1])
-                    freq = entry[0]
-                    Re = entry[1]
-                    Im = entry[2]
+                    #f_pred = np.geomspace(f[0],f[-1])
+                    freq = np.array(entry[0])
+                    Re = np.array(entry[1])
+                    Im = np.array(entry[2])
 
                     lf_index = np.argwhere(np.array(freq)>lf_limit)[-1][0]
                     hf_index = np.argwhere(np.array(freq)<hf_limit)[0][0]
-                    f = np.array(freq)
+                    #f = np.array(freq)
 
-                    freq = f[hf_index:lf_index]
+                    freq = freq[hf_index:lf_index]
                     Re = Re[hf_index:lf_index]
                     Im = Im[hf_index:lf_index]
 
@@ -140,7 +140,7 @@ def Nyquist(raw,circ="", fit_para = 0,lf_limit = 0,hf_limit = math.inf):
                         #fitted = fit(entry[0],entry[1],entry[2], circ=circ, fit_counter = fit_counter)
                         fitted = fit(freq,Re,Im, circ=circ, fit_counter = fit_counter)
                         fit_counter += 1
-
+                        f_pred = np.geomspace(freq[0],freq[-1])
                         # Obtain omega max values from the local maxima of -Im(Z)
                         omegas = omega_max(fitted[0].get_param_names(),fitted[0].parameters_.tolist(),-fitted[1].imag,f_pred)
                         qc = omegas[2]

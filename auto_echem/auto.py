@@ -4,6 +4,7 @@ import pandas as pd
 import time
 import numpy as np
 import datetime as dt
+import math
 
 from stat import ST_CTIME
 from matplotlib import cm
@@ -34,7 +35,7 @@ from auto_echem.GCPL_functions import cy_index
 
 
 
-def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_para = 0, cy = [1,2,5,10,20,30,50],l=0.14, r_cc=5, PEIS_evaluation = True, lf_limit='',hf_limit = '',clear_cell = False):
+def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_para = 0, cy = [1,2,5,10,20,30,50],l=0.14, r_cc=5, PEIS_evaluation = True, lf_limit=0,hf_limit = math.inf,clear_cell = False):
     '''
     Automatically detect and analysis the measurements produced by EC-lab.
     Insert pathway with EC-lab settings file (.mps)

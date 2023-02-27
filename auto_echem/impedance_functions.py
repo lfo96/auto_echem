@@ -1,5 +1,6 @@
 import time
 import cmath
+import math
 # from altair.vegalite.v4.api import value
 import numpy as np
 from numpy.lib.nanfunctions import _nanquantile_dispatcher
@@ -103,7 +104,7 @@ def eva_PEIS(df):
 
     return(data_PEIS)
 
-def Nyquist(raw,circ="", fit_para = 0,lf_limit = '',hf_limit = ''):
+def Nyquist(raw,circ="", fit_para = 0,lf_limit = 0,hf_limit = math.inf):
     '''
     Insert the raw PEIS data and a suitable circuit. Returns a list of the experimental and fitted Nyquist plot and a list of all corresponding charge transfer resistances.
     '''
@@ -126,6 +127,15 @@ def Nyquist(raw,circ="", fit_para = 0,lf_limit = '',hf_limit = ''):
                     freq = entry[0]
                     Re = entry[1]
                     Im = entry[2]
+
+                    lf_index = np.argwhere(np.array(freq)>lf_limit)[-1][0]
+                    hf_index = np.argwhere(np.array(freq)<hf_limit)[0][0]
+                    f = np.array(freq)
+
+                    freq = f[hf_index:lf_index]
+                    Re = Re[hf_index:lf_index]
+                    Im = Im[hf_index:lf_index]
+
                     if lf_limit != '':
                         try :
                             lf_index = np.argwhere(np.array(freq)<lf_limit)[0][0]

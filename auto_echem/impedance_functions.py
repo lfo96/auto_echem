@@ -53,7 +53,8 @@ def eva_PEIS(df):
         cycles_tot = df["cycle number"].iloc[-1] #get the total number of half cycles
     except KeyError:
         cycles_tot = df["z cycle"].iloc[-1]
-
+    except IndexError:
+        cycles_tot = 0
     if cycles_tot >= 1:
         # EC Lab counts the cycle number properly.
         for item in range(int(cycles_tot)):

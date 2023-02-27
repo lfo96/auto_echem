@@ -136,24 +136,6 @@ def Nyquist(raw,circ="", fit_para = 0,lf_limit = 0,hf_limit = math.inf):
                     Re = Re[hf_index:lf_index]
                     Im = Im[hf_index:lf_index]
 
-                    if lf_limit != '':
-                        try :
-                            lf_index = np.argwhere(np.array(freq)<lf_limit)[0][0]
-                            freq = f[0:lf_index]
-                            Re = Re[0:lf_index]
-                            Im = Im[0:lf_index]
-                        except IndexError:
-                            pass
-                    if hf_limit != '':
-                        try :
-                            hf_index = np.argwhere(np.array(freq)<hf_limit)[0][0]
-                            freq = f[hf_index:]
-                            Re = Re[hf_index:]
-                            Im = Im[hf_index:]
-                        except IndexError:
-                            pass
-                        
-
                     while qc == 0:
                         #fitted = fit(entry[0],entry[1],entry[2], circ=circ, fit_counter = fit_counter)
                         fitted = fit(freq,Re,Im, circ=circ, fit_counter = fit_counter)

@@ -63,7 +63,9 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 continue
             d = {}
             if meta['MB'] == True:
-                print(len(meta['data'][entry]))
+                if len(meta['data'][entry])==0:
+                    print(str([entry])+' is empty.')
+                    continue
                 # MB files do not contain the Re and Im part of the impedance and therefore need to be calculated from the absolute value and the phase shift. 
                 hyp = meta['data'][entry]['|Z|/Ohm']
                 alpha_deg = meta['data'][entry]['Phase(Z)/deg']*(np.pi/180)

@@ -8,7 +8,6 @@ import time
 import numpy as np
 import datetime as dt
 import cmath
-import math
 
 from scipy.stats import linregress
 from stat import ST_CTIME
@@ -22,6 +21,33 @@ from contextlib import contextmanager
 colors = ['#FF1F5B','#00CD6C','#009ADE','#AF58BA','#FFC61E','#F28522','#A0B1BA','#A6761D']
 coolors_1 = ['#052F5F','#005377','#06A77D','#D5C67A','#F1A208']
 #colors_II = ['#A0B1BA','#A6761D']
+
+
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+
+def colorFader(c1,c2,mix=0): 
+    '''
+    fade (linear interpolate) from color c1 (at mix=0) to c2 (mix=1)
+    '''
+    c1=np.array(mpl.colors.to_rgb(c1))
+    c2=np.array(mpl.colors.to_rgb(c2))
+    return mpl.colors.to_hex((1-mix)*c1 + mix*c2)
+
+def color_map(c1,c2,c3,n):
+    '''
+    Insert three colors codes, and number of data colors, creates interpolated color map of three colors.
+    Return a list of the colors and an actual colormap that can be used as cmap.
+    '''
+    color_lst_1 = []
+    color_lst_2 = []
+    n_half = int(n/2)
+    for x in range(n_half+1):
+        color_lst_1.append(colorFader(c1,c2,x/n_half))
+        color_lst_2.append(colorFader(c2,c3,x/n_half)) 
+    color_lst = color_lst_1+color_lst_2               
+    return(color_lst,ListedColormap(color_lst))
+    
+
 
 from numpy import diff
 def x_der(array):

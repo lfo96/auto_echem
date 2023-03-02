@@ -33,7 +33,7 @@ def colorFader(c1,c2,mix=0):
     c2=np.array(mpl.colors.to_rgb(c2))
     return mpl.colors.to_hex((1-mix)*c1 + mix*c2)
 
-def color_map(c1,c2,c3,n):
+def color_3map(c1,c2,c3,n):
     '''
     Insert three colors codes, and number of data colors, creates interpolated color map of three colors.
     Return a list of the colors and an actual colormap that can be used as cmap.
@@ -45,6 +45,18 @@ def color_map(c1,c2,c3,n):
         color_lst_1.append(colorFader(c1,c2,x/n_half))
         color_lst_2.append(colorFader(c2,c3,x/n_half)) 
     color_lst = color_lst_1+color_lst_2               
+    return(color_lst,ListedColormap(color_lst))
+
+def color_2map(c1,c2,n):
+    '''
+    Insert two colors codes, and number of data colors, creates interpolated color map of three colors.
+    Return a list of the colors and an actual colormap that can be used as cmap.
+    '''
+    color_lst_1 = []
+
+    for x in range(n+1):
+        color_lst_1.append(colorFader(c1,c2,x/n))
+    color_lst = color_lst_1               
     return(color_lst,ListedColormap(color_lst))
     
 

@@ -23,6 +23,14 @@ from impedance.models.circuits  import *
 
 from scipy.signal import argrelextrema
 
+
+def freq_index(freq, f):
+    '''
+    Insert frequency data and returns index of frequency value f
+    '''
+    index = abs(freq-f).sort_values(ascending=True).index[0]
+    return(index)
+
 def parameter(eva):
     '''
     extract the parameter from the evaluated PEIS data (via Nyquist function) and store them into a dictionary. Assumes a consistent circuit model.  
@@ -138,7 +146,11 @@ def Nyquist(raw,circ="", fit_para = 0,lf_limit = 0,hf_limit = math.inf):
 
                     while qc == 0:
                         #fitted = fit(entry[0],entry[1],entry[2], circ=circ, fit_counter = fit_counter)
-                        fitted = fit(freq,Re,Im, circ=circ, fit_counter = fit_counter)
+                        try: 
+                            fitted = fit(freq,Re,Im, circ=circ, fit_counter = fit_counter)
+                        except ValueError:
+                            print('Value Error!')
+                            break
                         fit_counter += 1
                         f_pred = np.geomspace(freq[0],freq[-1])
                         # Obtain omega max values from the local maxima of -Im(Z)

@@ -117,6 +117,7 @@ def plot_TGA_DSC(data, save = '', correction = False, x_lim= '', y_lim = '', y2_
     layout(ax2)
 
 
+
 def eva_MS(pathway, plot = True, save = '', x_lim='', y_lim ='', y2_lim = '', m_real = ''):
     with open(pathway,encoding= 'unicode_escape') as fin:
         header = 50
@@ -128,10 +129,12 @@ def eva_MS(pathway, plot = True, save = '', x_lim='', y_lim ='', y2_lim = '', m_
 
     df = pd.read_csv(pathway,encoding= 'unicode_escape', header=head_len-1)
     header_name = ['Temperature (C)','Time (min)','TIC (A)']
-    for i in range(10,len(df.columns.values)+7):
+    mz_i = int(df.columns.values[4].split(':')[1].split(')')[0])
+    mz_f = int((len(df.columns.values)-3)/2)+mz_i
+    print('MZ range found from: '+str(mz_i),str(mz_f-1))
+    for i in range(mz_i,mz_f):
         header_name.append('mz_'+str(i)+' (A)')
-
-    df = pd.read_csv(pathway,encoding= 'unicode_escape', header=head_len-1, names=header_name)
+    df = pd.read_csv(pathway,encoding= 'unicode_escape', header=head_len-1,names = header_name,usecols=header_name)
     return(df)
 
 def correction_BL_blank(file,blank,multiplier=1,BL_T = 70, BL_m_T = False):

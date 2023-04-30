@@ -350,10 +350,10 @@ def plot_CR(d, save = ''):
     return()      
 
 def plot_CP_raman(data,A_el, save = ''):
-    I_area = round(data['control/mA	'].mean()/meta['electrode surface area'],3)
+    I_area = round(data['control/mA'].mean()/meta['electrode surface area'],3)
     fig,ax = plt.subplots()
-    ax.plot(data['time/s']/3600,data['Ewe/V'])
-    layout(ax, x_label='time (h)',y_label = 'Potential (V)',title='Constant Current: '+str(I_area), color = 'black')
+    ax.plot(data['time/s']/3600,data['Ewe/V'], color = 'black')
+    layout(ax, x_label='time (h)',y_label = 'Potential (V)',title='Constant Current: '+str(I_area))
 
     ax2 = ax.twinx()
     ax2_color = 'tab:red'

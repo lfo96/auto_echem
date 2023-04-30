@@ -30,6 +30,7 @@ from auto_echem.impedance_functions import strip_plate
 from auto_echem.GCPL_functions import eva_GCPL
 from auto_echem.GCPL_functions import plot_galv
 from auto_echem.GCPL_functions import plot_CR
+from auto_echem.GCPL_functions import plot_CP_raman
 from auto_echem.GCPL_functions import cy_index
 
 
@@ -314,6 +315,15 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 cc_switch = [False,False]
                 if plot == '':
                     strip_plate(df_cc, title = str(I_cc_areal)+' $\mathregular{mA\,cm^{-2}}$')
+                    
+        elif entry.split(' ')[1] == 'CP':
+            ''''
+            Analysis for Constant Potential set up with Raman measurement. The A_el is automatically set to 0.4 cm radius.
+            '''
+            A_el = 0.4*0.4*3.141592
+            data = meta['data'][entry]
+            if plot == '':
+                plot_CP_raman(data,A_el, save = '')
             
     meta['eva'] = d_eva
     if clear_cell==True:

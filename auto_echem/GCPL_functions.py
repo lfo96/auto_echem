@@ -347,7 +347,25 @@ def plot_CR(d, save = ''):
     layout(ax2, y_label = 'Coulombic Efficiency')
     if save != "":
         plt.savefig(str(save)+"_CR.svg", bbox_inches='tight', transparent = True)
-    return()                            
+    return()      
+
+def plot_CP_raman(data,A_el, save = ''):
+    I_area = round(data['control/mA	'].mean()/meta['electrode surface area'],3)
+    fig,ax = plt.subplots()
+    ax.plot(data['time/s']/3600,data['Ewe/V'])
+    layout(ax, x_label='time (h)',y_label = 'Potential (V)',title='Constant Current: '+str(I_area), color = 'black')
+
+    ax2 = ax.twinx()
+    ax2_color = 'tab:red'
+    ax2.plot(data['time/s']/3600,data['control/mA']/A_el, color = ax2_color)
+    ax2.set_ylabel('$\mathregular{Current \, mA\,cm^{-2}}$',fontsize = 16,color='white',path_effects=[pe.withStroke(linewidth=1.5, foreground=ax2_color)])  #
+    plt.yticks(fontsize=12,color='white',path_effects=[pe.withStroke(linewidth=1.5, foreground=ax2_color)])
+    ax2.tick_params(direction='in', length=6, width=1.5, color = ax2_color)
+    ax2.spines["right"].set_color(ax2_color)
+    layout(ax2, y_label = '$\mathregular{Current \, mA\,cm^{-2}}$')
+    if save != "":
+        plt.savefig(str(save)+"_CC.svg", bbox_inches='tight', transparent = True)
+    return()                         
 
 def quick(path, save = '', cy = [1,2,5,10,20,30,50], title = '', calc = False):
     file = info(path)

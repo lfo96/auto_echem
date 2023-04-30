@@ -353,7 +353,7 @@ def plot_CP_raman(data,A_el, save = ''):
     I_area = round(data['control/mA'].mean()/A_el,3)
     fig,ax = plt.subplots()
     ax.plot(data['time/s']/3600,data['Ewe/V'], color = 'black')
-    layout(ax, x_label='time (h)',y_label = 'Potential (V)',title='Constant Current: '+str(I_area))
+    layout(ax, x_label='time (h)',y_label = 'Potential (V)',title='Constant Current: '+str(I_area)+'$\mathregular{mA\,cm^{-2}}$')
     ax2 = ax.twinx()
     ax2_color = 'tab:red'
     ax2.plot(data['time/s']/3600,data['control/mA']/A_el, color = ax2_color)

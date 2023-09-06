@@ -38,6 +38,8 @@ def eva_GCPL(df,m_am,A_el):
     cy_no = 1
     for cycle in range(int(cycles_tot)+1):
         data_cycle = df.loc[(df["half cycle"]==cycle) & (df['control/V/mA']!= 0)] #only display corresponding to a cycle and with current different to zero
+        if len(data_cycle)<=1:
+            continue 
         I = data_cycle['control/V/mA'].mean()
         if I <= 0:
             dis = data_cycle

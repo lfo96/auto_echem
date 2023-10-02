@@ -866,3 +866,21 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,igno
     }
     return(d)
 
+from impedance.validation import linKK
+def KK_test(data,plot=True):
+    freq = data[0]
+    Re = data[1]
+    Im = data[2]
+    f = np.array(freq)
+    Z = np.complex128(np.array(Re)-1j*(np.array(Im)))
+    M, mu, Z_linKK, res_real, res_imag = linKK(f_m_new, Z_m, c=.85, max_M=100, fit_type='complex', add_cap=True)
+    print('\nCompleted Lin-KK Fit\nM = {:d}\nmu = {:.2f}'.format(M, mu))
+    
+    if plot == True:
+        fig,ax = plt.subplots()
+        plt.plot(f,res_real,'o--', label = '$\\Delta_{Re}$')
+        plt.plot(f,res_imag,'o--', label = '$\\Delta_{Re}$')
+        ax.set_xscale('log')
+        layout(ax, x_label = 'f (Hz)', y_label='$\\Delta$ $(\\%)$')
+    return 
+

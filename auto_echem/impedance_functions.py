@@ -866,9 +866,17 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,igno
     }
     return(d)
 
-from impedance.validation import linKK=
+def convert_float32_to_float64(arr):
+    if arr.dtype == np.float32:
+        return arr.astype(np.float64)
+    else:
+        return arr  # If the array is not of dtype np.float32, return it unchanged
+
+from impedance.validation import linKK
+
 def KK_test(data,plot=True):
     freq = data[0]
+    freq = convert_float32_to_float64(freq)
     Re = data[1]
     Im = data[2]
     f = np.array(freq)

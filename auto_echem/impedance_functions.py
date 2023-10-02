@@ -866,7 +866,7 @@ def EIS_WE(data,sequence,circ='Rp',lf_limit='',hf_limit='', fit_counter = 0,igno
     }
     return(d)
 
-from impedance.validation import linKK
+from impedance.validation import linKK=
 def KK_test(data,plot=True):
     freq = data[0]
     Re = data[1]

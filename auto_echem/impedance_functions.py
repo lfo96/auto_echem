@@ -873,15 +873,13 @@ def convert_float32_to_float64(arr):
         return arr  # If the array is not of dtype np.float32, return it unchanged
 
 from impedance.validation import linKK
-
 def KK_test(data,plot=True):
     freq = data[0]
-    freq = convert_float32_to_float64(freq)
     Re = data[1]
     Im = data[2]
     f = np.array(freq)
     Z = np.complex128(np.array(Re)-1j*(np.array(Im)))
-    M, mu, Z_linKK, res_real, res_imag = linKK(f_m_new, Z_m, c=.85, max_M=100, fit_type='complex', add_cap=True)
+    M, mu, Z_linKK, res_real, res_imag = linKK(f, Z, c=.85, max_M=100, fit_type='complex', add_cap=True)
     print('\nCompleted Lin-KK Fit\nM = {:d}\nmu = {:.2f}'.format(M, mu))
     
     if plot == True:
@@ -892,3 +890,30 @@ def KK_test(data,plot=True):
         layout(ax, x_label = 'f (Hz)', y_label='$\\Delta$ $(\\%)$')
     return 
 
+def Z_pRCPE(f,R,Q,alpha):
+    '''
+    Calculate the impedance Z of a parallel p(R-CPE) circuit at different frequencies (f).
+    '''
+    angular_frequencies = 2 * np.pi * f
+    Q_z = 1 / ((1j * angular_frequencies * Q)**alpha)
+    R_z = R
+    Z = 1 / (1 / Q_z + 1 / R_z)
+    return(Z)
+
+def find_pRCPE(parameter,parameter_value):
+    '''
+    Insert the circuit.get_param_names()[0] and circuit.parameters_.tolist()  (parameter names & values) into this function, and returns a touple of (R, Q, alpha) for each parallel R-CPE found in the fitted EIS data.
+    '''
+    p_RCPE_lst = []
+    
+    for i,entry in enumerate(parameter):
+        if entry[0]=='R':
+            R_i = entry[1]
+            R = entry
+            CPE = 'CPE'+R_i
+            Q = CPE+'_0'
+            alpha = CPE + '_1'
+            if Q in parameter:
+                pRCPE = (parameter_value[parameter.index(R)],parameter_value[parameter.index(Q)],parameter_value[parameter.index(alpha)])
+                p_RCPE_lst.append(pRCPE)
+    return(p_RCPE_lst)

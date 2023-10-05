@@ -878,6 +878,7 @@ def KK_test(data,plot=True):
     Re = data[1]
     Im = data[2]
     f = np.array(freq)
+    f = convert_float32_to_float64(f)
     Z = np.complex128(np.array(Re)-1j*(np.array(Im)))
     M, mu, Z_linKK, res_real, res_imag = linKK(f, Z, c=.85, max_M=100, fit_type='complex', add_cap=True)
     print('\nCompleted Lin-KK Fit\nM = {:d}\nmu = {:.2f}'.format(M, mu))
@@ -885,7 +886,7 @@ def KK_test(data,plot=True):
     if plot == True:
         fig,ax = plt.subplots()
         plt.plot(f,res_real,'o--', label = '$\\Delta_{Re}$')
-        plt.plot(f,res_imag,'o--', label = '$\\Delta_{Re}$')
+        plt.plot(f,res_imag,'o--', label = '$\\Delta_{imag}$')
         ax.set_xscale('log')
         layout(ax, x_label = 'f (Hz)', y_label='$\\Delta$ $(\\%)$')
     return 
@@ -917,3 +918,19 @@ def find_pRCPE(parameter,parameter_value):
                 pRCPE = (parameter_value[parameter.index(R)],parameter_value[parameter.index(Q)],parameter_value[parameter.index(alpha)])
                 p_RCPE_lst.append(pRCPE)
     return(p_RCPE_lst)
+
+
+def plot_pRCPE(ax,para_names,para_value):
+    '''
+    Insert ax from fig,ax to plot, para names commonly found as circuit.get_param_names()[0] and parameter values found as circuit.parameters_.tolist()
+    '''
+    p_RCPE_lst = find_pRCPE(para_names,para_value)
+    R_sum = para_value[0]
+    for i,entry in enumerate(p_RCPE_lst):
+        Z_calc = Z_pRCPE(f,entry[0],entry[1],entry[2])
+        tau = entry[0]*entry[1]*1000 # ms
+        ax.plot(np.real(Z_calc)+R_sum, -np.imag(Z_calc), label = str(round(tau,3))+' ms')
+        ax.fill_between(np.real(Z_calc)+R_sum,0, -np.imag(Z_calc),alpha=0.3)
+        R_sum += entry[0]
+    return(ax)
+    

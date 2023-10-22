@@ -32,7 +32,7 @@ def has_decreasing_numbers(data):
             return True
     return False
 
-def eva_GCPL_index(data, m_am):
+def eva_GCPL_index(data, m_am, A_el):
     '''
     Alternative GCPL analysis for files that are werid where the half cycle number is not increasing linarly but rather has jumps in tehre...
     '''
@@ -43,6 +43,8 @@ def eva_GCPL_index(data, m_am):
     en_dis = []
     en_cha = []
     cy_no = len(index[0])
+    I_areal = []
+    I_specific = []
     dis_counter = 0
     cha_counter = 0
     cy_counter = 0
@@ -83,6 +85,9 @@ def eva_GCPL_index(data, m_am):
 
             en_dis.append(en_dis_cy)
             en_cha.append(en_cha_cy)
+            I_areal.append(round(1000*I/A_el,3))
+            I_specific.append(round(I/m_am,3))
+            
             cy_counter += 1
             dis_counter = 0
             cha_counter = 0
@@ -96,6 +101,8 @@ def eva_GCPL_index(data, m_am):
         "Discharge Energy (mWh/g)": en_dis,
         "Charge Energy (mWh/g)": en_cha,
         "Energy Efficency (%)" : ee,
+        "Areal Current (\u03BCA/cm$^2$)" : I_areal,
+        "Specific Current (mA/g)" : I_specific,
     }
     eva = pd.DataFrame(eva)
     return(eva,galv)

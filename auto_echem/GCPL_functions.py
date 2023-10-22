@@ -93,7 +93,7 @@ def eva_GCPL_index(data, m_am, A_el):
             cha_counter = 0
             
             
-        if i == int(cy_no):
+        elif i == int(cy_no-1):
             if cha_counter ==1:
                 # define the missing parameter which would have been determined if cha_counter was 1.
                 cap_dis.append(abs(dis['Q charge/discharge/mA.h']).iloc[-1]/(0.001*m_am))
@@ -111,9 +111,7 @@ def eva_GCPL_index(data, m_am, A_el):
             #galv.append(((grav_cap_dis,dis["Ewe/V"],t_dis),(grav_cap_cha,cha["Ewe/V"], t_cha)))
                 d_galv = {
                     'Gravimetric Discharge Capacity (mAh/g)' : grav_cap_dis,
-                    'Gravimetric Discharge Capacity Calculated (mAh/g)' : grav_cap_dis_calc,
                     'Gravimetric Charge Capacity (mAh/g)' : grav_cap_cha,
-                    'Gravimetric Charge Capacity Calculated (mAh/g)' : grav_cap_cha_calc,
                     'Discharge Potential (V)' : dis["Ewe/V"],
                     'Charge Potential (V)' : cha["Ewe/V"],
                     'Discharge Time (s)' : t_dis,
@@ -124,13 +122,13 @@ def eva_GCPL_index(data, m_am, A_el):
                 galv.append(d_galv)
 
                 # calculate energy by integrating the capacity in mWh/g. 
-                en_dis, en_cha = simps(dis["Ewe/V"],grav_cap_dis), simps(cha["Ewe/V"],grav_cap_cha)
-                energy_dis.append(en_dis)
-                energy_cha.append(en_cha)
+                en_dis_cy, en_cha_cy  = simps(dis["Ewe/V"],grav_cap_dis), simps(cha["Ewe/V"],grav_cap_cha)
+                en_dis.append(en_dis_cy)
+                en_cha.append(en_cha_cy)
                 I_areal.append(round(I/A_el,3))
                 I_specific.append(round(I/m_am,3))
 
-                cy_no += 1
+                cy_counter += 1
                 print("Incomplete last cycle - discharge added.")
             elif dis_counter ==1:
                 # define the missing parameter which would have been determined if cha_counter was 1.
@@ -150,9 +148,7 @@ def eva_GCPL_index(data, m_am, A_el):
             #galv.append(((grav_cap_dis,dis["Ewe/V"],t_dis),(grav_cap_cha,cha["Ewe/V"], t_cha)))
                 d_galv = {
                     'Gravimetric Discharge Capacity (mAh/g)' : grav_cap_dis,
-                    'Gravimetric Discharge Capacity Calculated (mAh/g)' : grav_cap_dis_calc,
                     'Gravimetric Charge Capacity (mAh/g)' : grav_cap_cha,
-                    'Gravimetric Charge Capacity Calculated (mAh/g)' : grav_cap_cha_calc,
                     'Discharge Potential (V)' : dis["Ewe/V"],
                     'Charge Potential (V)' : cha["Ewe/V"],
                     'Discharge Time (s)' : t_dis,
@@ -163,18 +159,15 @@ def eva_GCPL_index(data, m_am, A_el):
                 galv.append(d_galv)
 
                 # calculate energy by integrating the capacity in mWh/g. 
-                en_dis, en_cha = simps(dis["Ewe/V"],grav_cap_dis), simps(cha["Ewe/V"],grav_cap_cha)
-                energy_dis.append(en_dis)
-                energy_cha.append(en_cha)
+                en_dis_cy, en_cha_cy = simps(dis["Ewe/V"],grav_cap_dis), simps(cha["Ewe/V"],grav_cap_cha)
+                en_dis.append(en_dis_cy)
+                en_cha.append(en_cha_cy)
 
-                en_dis_calc, en_cha_calc = simps(dis["Ewe/V"],grav_cap_dis_calc), simps(cha["Ewe/V"],grav_cap_cha_calc)
-                energy_dis_calc.append(en_dis_calc)
-                energy_cha_calc.append(en_cha_calc)
 
                 I_areal.append(round(I/A_el,3))
                 I_specific.append(round(I/m_am,3))
 
-                cy_no += 1
+                cy_counter += 1
                 print("Incomplete last cycle - charge added.")        
     
     

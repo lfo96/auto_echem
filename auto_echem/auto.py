@@ -159,6 +159,12 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                 if has_decreasing_numbers(meta['data'][entry]['half cycle'])== True:
                     print('Alternative index based GCPL analysis.')
                     d = eva_GCPL_index(meta['data'][entry], meta['active material mass'])
+                    if plot == '':
+                        plot_galv(d, save = save, cy = cy)
+                        plot_CR(d, save = save)
+                    d_eva[entry] = d
+                    end = time.time()
+                    print(entry + ' evaluated in '+str(round(end - start,2))+' seconds.')
                 else:
                     d = eva_GCPL(meta['data'][entry], meta['active material mass'], meta['electrode surface area'])
                     if d[0]['Gravimetric Discharge Capacity (mAh/g)'].isna().sum()==len(d[0]['Gravimetric Discharge Capacity (mAh/g)']):

@@ -161,32 +161,32 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
                     d = eva_GCPL_index(meta['data'][entry], meta['active material mass'])
                 else:
                     d = eva_GCPL(meta['data'][entry], meta['active material mass'], meta['electrode surface area'])
-                if d[0]['Gravimetric Discharge Capacity (mAh/g)'].isna().sum()==len(d[0]['Gravimetric Discharge Capacity (mAh/g)']):
-                    '''
-                    This is triggered in the stripping plating GCPL. Not entirley sure why but it populates all columns with np.nan...
-                    '''
-                    d = {}
-                    data = meta['data'][entry]
-                    op = []
-                    cy_in = cy_index(data)
-                    for i in cy_in[1]:
-                        op.append(data['Ewe/V'].loc[data.index[i]])
-                    print(entry + ' evaluated.')
-                    I_area = round(data['control/V/mA'].max()/meta['electrode surface area'],3)
-                    d['over potential'] = op
-                    d['areal current (mA/cm2)'] = I_area
-                    if plot == '':
-                        strip_plate(data, title = str(I_area)+' mA/cm2')
-                    d_eva[entry] = d
-                    end = time.time()
-                    print(entry + ' evaluated in '+str(round(end - start,2))+' seconds.')
-                else:
-                    if plot == '':
-                        plot_galv(d, save = save, cy = cy)
-                        plot_CR(d, save = save)
-                    d_eva[entry] = d
-                    end = time.time()
-                    print(entry + ' evaluated in '+str(round(end - start,2))+' seconds.')
+                    if d[0]['Gravimetric Discharge Capacity (mAh/g)'].isna().sum()==len(d[0]['Gravimetric Discharge Capacity (mAh/g)']):
+                        '''
+                        This is triggered in the stripping plating GCPL. Not entirley sure why but it populates all columns with np.nan...
+                        '''
+                        d = {}
+                        data = meta['data'][entry]
+                        op = []
+                        cy_in = cy_index(data)
+                        for i in cy_in[1]:
+                            op.append(data['Ewe/V'].loc[data.index[i]])
+                        print(entry + ' evaluated.')
+                        I_area = round(data['control/V/mA'].max()/meta['electrode surface area'],3)
+                        d['over potential'] = op
+                        d['areal current (mA/cm2)'] = I_area
+                        if plot == '':
+                            strip_plate(data, title = str(I_area)+' mA/cm2')
+                        d_eva[entry] = d
+                        end = time.time()
+                        print(entry + ' evaluated in '+str(round(end - start,2))+' seconds.')
+                    else:
+                        if plot == '':
+                            plot_galv(d, save = save, cy = cy)
+                            plot_CR(d, save = save)
+                        d_eva[entry] = d
+                        end = time.time()
+                        print(entry + ' evaluated in '+str(round(end - start,2))+' seconds.')
             except UnboundLocalError:
                 print('Unbound Local Error: Potential incomplete first cycle.')
         

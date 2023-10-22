@@ -157,6 +157,7 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
         elif entry.split(' ')[1] == 'GCPL':
             try:
                 if has_decreasing_numbers(meta['data'][entry]['half cycle'])== True:
+                    print('Alternative index based GCPL analysis.')
                     d = eva_GCPL_index(meta['data'][entry], meta['active material mass'])
                 else:
                     d = eva_GCPL(meta['data'][entry], meta['active material mass'], meta['electrode surface area'])

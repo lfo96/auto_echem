@@ -88,7 +88,6 @@ def eva_GCPL_index(data, m_am):
             cha_counter = 0
     ce = np.array(cap_dis)/np.array(cap_cha)
     ee = np.array(en_dis)/np.array(en_cha)
-    print(len(cap_dis),len(cap_cha))
     eva = {
         "Cycle" : range(1,cy_counter+1),
         "Gravimetric Discharge Capacity (mAh/g)" : cap_dis,

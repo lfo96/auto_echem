@@ -28,6 +28,8 @@ from auto_echem.impedance_functions import eva_PEIS
 from auto_echem.impedance_functions import strip_plate
 
 from auto_echem.GCPL_functions import eva_GCPL
+from auto_echem.GCPL_functions import has_decreasing_numbers
+from auto_echem.GCPL_functions import eva_GCPL_index
 from auto_echem.GCPL_functions import plot_galv
 from auto_echem.GCPL_functions import plot_CR
 from auto_echem.GCPL_functions import plot_CP_raman
@@ -154,7 +156,10 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
 
         elif entry.split(' ')[1] == 'GCPL':
             try:
-                d = eva_GCPL(meta['data'][entry], meta['active material mass'], meta['electrode surface area'])
+                if has_decreasing_numbers(meta['data'][entry]['half cycle'])== True:
+                    d = eva_GCPL_index(meta['data'][entry], meta['active material mass'])
+                else:
+                    d = eva_GCPL(meta['data'][entry], meta['active material mass'], meta['electrode surface area'])
                 if d[0]['Gravimetric Discharge Capacity (mAh/g)'].isna().sum()==len(d[0]['Gravimetric Discharge Capacity (mAh/g)']):
                     '''
                     This is triggered in the stripping plating GCPL. Not entirley sure why but it populates all columns with np.nan...

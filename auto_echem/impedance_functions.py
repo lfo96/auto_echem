@@ -873,7 +873,7 @@ def convert_float32_to_float64(arr):
         return arr  # If the array is not of dtype np.float32, return it unchanged
 
 from impedance.validation import linKK
-def KK_test(data,plot=True):
+def KK_test(data,plot=True, save = ''):
     freq = data[0]
     Re = data[1]
     Im = data[2]
@@ -885,12 +885,13 @@ def KK_test(data,plot=True):
     
     if plot == True:
         fig,ax = plt.subplots()
-        plt.plot(f,res_real,'o--', label = '$\\Delta_{Re}$')
-        plt.plot(f,res_imag,'o--', label = '$\\Delta_{imag}$')
+        plt.plot(f,res_real,'o--', label = '$\\Delta_{Re}$', color = '#FE938C')
+        plt.plot(f,res_imag,'o--', label = '$\\Delta_{imag}$', color = '#16697A')
         ax.set_xscale('log')
         layout(ax, x_label = 'f (Hz)', y_label='$\\Delta$ $(\\%)$')
+        if save != '':
+            plt.savefig(save+'.svg', transparent = True, bbox_inches = 'tight')
     return 
-
 def Z_pRCPE(f,R,Q,alpha):
     '''
     Calculate the impedance Z of a parallel p(R-CPE) circuit at different frequencies (f).

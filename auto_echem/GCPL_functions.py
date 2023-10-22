@@ -17,6 +17,91 @@ from auto_echem.general_functions import data_set
 # from .neware_reader_master.neware import *
 from scipy.integrate import simps
 
+def has_decreasing_numbers(data):
+    """
+    Check if a data set has any decreasing numbers.
+
+    Parameters:
+    - data: List or array of data points.
+
+    Returns:
+    - True if there are decreasing numbers; False otherwise.
+    """
+    for i in range(1, len(data)):
+        if data[i] < data[i - 1]:
+            return True
+    return False
+
+def eva_GCPL_index(data, m_am):
+    '''
+    Alternative GCPL analysis for files that are werid where the half cycle number is not increasing linarly but rather has jumps in tehre...
+    '''
+    index = cy_index(data)
+    galv = []
+    cap_dis = []
+    cap_cha = []
+    en_dis = []
+    en_cha = []
+    cy_no = len(index[0])
+    dis_counter = 0
+    cha_counter = 0
+    cy_counter = 0
+    for i in range(cy_no):
+        df_cy = data.loc[data['control/V/mA']!= 0].loc[index[0][i]:index[1][i]]
+        I = df_cy['control/V/mA'].mean()
+        if I <= 0:
+            dis = df_cy
+            t_0_d = dis['time/s'].iloc[0]
+            grav_cap_dis = abs(dis['Q charge/discharge/mA.h'])/(0.001*m_am) 
+            cap_dis.append(grav_cap_dis.iloc[-1])
+            dis_counter += 1
+
+        elif I >= 0:
+            cha = df_cy
+            t_0_c = cha['time/s'].iloc[0]
+            grav_cap_cha = abs(cha['Q charge/discharge/mA.h'])/(0.001*m_am)
+            cap_cha.append(grav_cap_cha.iloc[-1]) 
+            cha_counter += 1
+
+        if cha_counter == 1 and dis_counter == 1:
+            # end of dis and recharge half cycle. Add the values to galv file
+            d_galv = {
+                    'Discharge Time (s)' : dis['time/s']-t_0_d,
+                    'Gravimetric Discharge Capacity (mAh/g)' : grav_cap_dis,
+                    'WE Discharge Potential (V)' : dis['Ewe/V'],
+                    'Discharge Current (mA)' : dis['control/V/mA'],
+                    'Discharge Q (mAh)' : dis['(Q-Qo)/mA.h'],
+                    'Charge Time (s)' : cha['time/s']-t_0_c,
+                    'Gravimetric Charge Capacity (mAh/g)' : grav_cap_cha,
+                    'WE Charge Potential (V)' : cha['Ewe/V'],
+                    'Charge Current (mA)' : cha['control/V/mA'],
+                    'Charge Q (mAh)' : cha['(Q-Qo)/mA.h'],
+            }
+
+            galv.append(d_galv)            
+            en_dis_cy, en_cha_cy = simps(dis['Ewe/V'],grav_cap_dis), simps(cha['Ewe/V'],grav_cap_cha)
+
+            en_dis.append(en_dis_cy)
+            en_cha.append(en_cha_cy)
+            cy_counter += 1
+            dis_counter = 0
+            cha_counter = 0
+    ce = np.array(cap_dis)/np.array(cap_cha)
+    ee = np.array(en_dis)/np.array(en_cha)
+    print(len(cap_dis),len(cap_cha))
+    eva = {
+        "Cycle" : range(1,cy_counter+1),
+        "Gravimetric Discharge Capacity (mAh/g)" : cap_dis,
+        "Gravimetric Charge Capacity (mAh/g)": cap_cha,
+        "Coulombic Efficency (%)" : ce,
+        "Discharge Energy (mWh/g)": en_dis,
+        "Charge Energy (mWh/g)": en_cha,
+        "Energy Efficency (%)" : ee,
+    }
+    eva = pd.DataFrame(eva)
+    return(galv,eva)
+
+
 def eva_GCPL(df,m_am,A_el):
     cycles_tot = df["half cycle"].iloc[-1] #get the total number of half cycles
     cap_dis = []

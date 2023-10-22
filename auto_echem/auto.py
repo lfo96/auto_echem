@@ -158,7 +158,7 @@ def auto(pathway, circ = ['Rp', 'Rp'], plot = '',resttime = 50, save = '',fit_pa
             try:
                 if has_decreasing_numbers(meta['data'][entry]['half cycle'])== True:
                     print('Alternative index based GCPL analysis.')
-                    d = eva_GCPL_index(meta['data'][entry], meta['active material mass'])
+                    d = eva_GCPL_index(meta['data'][entry], meta['active material mass'], meta['electrode surface area'])
                     if plot == '':
                         plot_galv(d, save = save, cy = cy)
                         plot_CR(d, save = save)

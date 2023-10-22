@@ -68,12 +68,12 @@ def eva_GCPL_index(data, m_am):
             d_galv = {
                     'Discharge Time (s)' : dis['time/s']-t_0_d,
                     'Gravimetric Discharge Capacity (mAh/g)' : grav_cap_dis,
-                    'WE Discharge Potential (V)' : dis['Ewe/V'],
+                    'Discharge Potential (V)' : dis['Ewe/V'],
                     'Discharge Current (mA)' : dis['control/V/mA'],
                     'Discharge Q (mAh)' : dis['(Q-Qo)/mA.h'],
                     'Charge Time (s)' : cha['time/s']-t_0_c,
                     'Gravimetric Charge Capacity (mAh/g)' : grav_cap_cha,
-                    'WE Charge Potential (V)' : cha['Ewe/V'],
+                    'Charge Potential (V)' : cha['Ewe/V'],
                     'Charge Current (mA)' : cha['control/V/mA'],
                     'Charge Q (mAh)' : cha['(Q-Qo)/mA.h'],
             }

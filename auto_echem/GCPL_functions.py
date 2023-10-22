@@ -98,7 +98,7 @@ def eva_GCPL_index(data, m_am):
         "Energy Efficency (%)" : ee,
     }
     eva = pd.DataFrame(eva)
-    return(galv,eva)
+    return(eva,galv)
 
 
 def eva_GCPL(df,m_am,A_el):

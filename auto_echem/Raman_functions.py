@@ -9,6 +9,7 @@ import numpy as np
 import datetime as dt
 import cmath
 import matplotlib as mpl
+from auto_echem.auto import auto
 
 
 from scipy       import integrate

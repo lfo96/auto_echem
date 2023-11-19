@@ -8,8 +8,15 @@ import time
 import numpy as np
 import datetime as dt
 import cmath
+import math
 import matplotlib as mpl
+from scipy       import integrate, special,optimize
+from scipy       import integrate, special,optimize
 from auto_echem.auto import auto
+import matplotlib.cm     as cm
+from lmfit       import Model, Parameters, minimize, fit_report
+from auto_echem.general_functions import color_gradient
+from auto_echem.general_functions import layout
 
 
 from scipy       import integrate

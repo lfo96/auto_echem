@@ -148,6 +148,22 @@ def concloading_LFO(raman_p,out_p,fun,meas_index = []):
 import os
 from datetime import datetime
 
+def find_BL(p_raman):
+    '''
+    Find the manaually BL corrected files in a directory.
+    Returns a list of all the _BL files and a list of the index of the measurements.
+    '''
+    BL_lst = []
+    index_lst = []
+    direc = list_files_with_last_modified_sorted('\\'.join(p_raman.split('\\')[:-1]))
+    for entry in direc:
+        if len(entry[0])>=7 and (entry[0][-6]+entry[0][-5]) == 'BL' and entry[0][-1] == 't':
+            BL_lst.append(entry[0])
+            index = entry[0].split('_BL')[0]
+            index = index.split('_')[-1]
+            index_lst.append(int(index))
+    return(BL_lst,index_lst)
+
 def list_files_with_last_modified_sorted(directory_path):
     files_info = []
 

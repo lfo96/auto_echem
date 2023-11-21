@@ -344,7 +344,7 @@ def removeoutliers_LFO(eva_class, s=0.05, save = ''):
     e_good=deepcopy(eva)
     z_max = eva_class.z_valuesCut
     keys = list(dict.keys(eva))
-    colors = color_gradient(keys[-1]+1)
+    colors = color_gradient(np.array(keys).max()+1)
     time = eva_class.time_CP[eva_class.time_CP > 0]
     fig,ax = plt.subplots()
     chi_lst = []
@@ -437,7 +437,7 @@ def curvefitting_LFO(eva_class):
         return  (a)/1000*((b/(3.1415)**0.5)*np.exp(-((((-x+z_max)/1e6)/b)**2))-((((-x+z_max)/1e6))*special.erfc(((-x+z_max)/1e6)/b)))-(a/1000)*((b/(3.1415)**0.5)*np.exp(-(((((x)/1e6))/b)**2))-((((x)/1e6))*special.erfc(((x)/1e6)/b)))+c_ini
 
     fig,ax = plt.subplots()
-    colors = color_gradient(keys[-1]+1)
+    colors = color_gradient(np.array(keys).max()+1)
     for counter,i in enumerate(keys):
         # set x_axis and y_axis value
         x=np.array(eva[i][0])

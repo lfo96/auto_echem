@@ -35,11 +35,6 @@ def create_path_if_not_exists(path):
     else:
         print(f"Path '{path}' already exists.")
 
-# Example usage:
-path_to_create = 'example_folder'
-
-create_path_if_not_exists(path_to_create)
-
 ### Old Functions which need to be updated...
 class Peak():
 	def __init__(self, path_to_input, dst_dir):

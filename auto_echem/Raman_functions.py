@@ -118,7 +118,7 @@ def concloading_LFO(raman_p,out_p,fun,meas_index = []):
                     f.write('\t')
                     f.write(str(d1['Intensity'].iloc[j]))
                     f.write('\n')
-            n = fun(p5, p_out)
+            n = fun(p5, out_p)
             try:
                 n.run()
                 c.append(n.concentration_m)

@@ -17,11 +17,13 @@ import matplotlib.cm     as cm
 from lmfit       import Model, Parameters, minimize, fit_report
 from auto_echem.general_functions import color_gradient
 from auto_echem.general_functions import layout
+from auto_echem.general_functions import outliers
 
 
 from scipy       import integrate
 import numpy             as np
 
+### Old Functions which need to be updated...
 class Peak():
 	def __init__(self, path_to_input, dst_dir):
 		self.filename = path_to_input
@@ -90,6 +92,50 @@ class Peak():
 				f.write(str(self.truncated[i]))
 				f.write('\n')
 		return
+
+def concloading(p_raman,p_out,n,fun):
+    '''
+    param path1: the input path for the Raman data    
+    param path3: the output path for recording ecaluated data
+    param n: the number of file you want to analysis
+    param fun:#p1 is the function. For detail, pls see "F1"
+    ---
+    return a dictionary
+    '''
+    
+    e  = {}
+    meta = {}
+
+    for t in range(n):
+        p_raman_i = p_raman+str(t)+'_BL.txt'
+        d  = pd.DataFrame(np.loadtxt(p_raman_i), columns = ['Z', 'Wave','Intensity'])
+        z  = d['Z'].drop_duplicates().tolist()
+        c = []
+        for i in range(len(z)):
+            d_z = d.loc[d['Z']==z[i]]
+            p_out_z=p_out+r'\raman_linescan.txt'
+            with open(p_out_z, 'w', encoding="utf8", errors="ignore") as f:
+                for j in range(len(d_z['Wave'])):
+                    f.write(str(d_z['Wave'].iloc[j]))
+                    f.write('\t')
+                    f.write(str(d_z['Intensity'].iloc[j]))
+                    f.write('\n')
+            data_processing = fun(p_out_z, p_out)
+            try:
+                data_processing.run()
+                c.append(data_processing.concentration_m)
+            except ZeroDivisionError:
+                c.append(np.nan)       
+        print('【Processing '+str(t)+'】')
+        e[t] = (z,c,d)
+    meta['raman_t'] = np.array(range(n)).tolist()
+    meta['z_list'] = z
+
+    print('【All Evaluated】')
+    return e,z,meta
+
+
+
 ## Functions to determine the time for a raman linescan
 import os
 from datetime import datetime
@@ -139,11 +185,12 @@ def mean_ramanscan_time(meas_index,timestamp):
         t_dif = timestamp[i]-timestamp[i-1]
         if index_dif == 1:
             raman_meas_time.append(t_dif.seconds)
-    mean_time = np.array(raman_meas_time).mean()
-    std_time = np.array(raman_meas_time).std()
-    if std_time/mean_time>=0.001:
-        print('Potentially something wrong the the automatic Raman measurement time determination.')
-        plt.scatter(range(len(raman_meas_time)),raman_meas_time)
+    raman_meas_time = outliers(raman_meas_time, 1)
+    mean_time = np.nanmean(np.array(raman_meas_time))
+    std_time = np.nanstd(np.array(raman_meas_time))
+    fig,ax = plt.subplots()
+    plt.scatter(range(len(raman_meas_time)),raman_meas_time)
+    layout(ax, x_label='Line Scan Index', y_label='Line Scan Time (s)')
     return(mean_time/3600)
                     
 

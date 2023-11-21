@@ -93,46 +93,42 @@ class Peak():
 				f.write('\n')
 		return
 
-def concloading(p_raman,p_out,n,fun):
+def concloading_LFO(raman_p,out_p,fun,meas_index = []):
     '''
     param path1: the input path for the Raman data    
     param path3: the output path for recording ecaluated data
-    param n: the number of file you want to analysis
+    param x: the number of file you want to analysis
     param fun:#p1 is the function. For detail, pls see "F1"
     ---
     return a dictionary
     '''
     
     e  = {}
-    meta = {}
-
-    for t in range(n):
-        p_raman_i = p_raman+str(t)+'_BL.txt'
-        d  = pd.DataFrame(np.loadtxt(p_raman_i), columns = ['Z', 'Wave','Intensity'])
+    for t in meas_index:
+        p4 = raman_p+str(t)+'_BL.txt'
+        d  = pd.DataFrame(np.loadtxt(p4), columns = ['Z', 'Wave','Intensity'])
         z  = d['Z'].drop_duplicates().tolist()
-        c = []
+        c=[]
         for i in range(len(z)):
-            d_z = d.loc[d['Z']==z[i]]
-            p_out_z=p_out+r'\raman_linescan.txt'
-            with open(p_out_z, 'w', encoding="utf8", errors="ignore") as f:
-                for j in range(len(d_z['Wave'])):
-                    f.write(str(d_z['Wave'].iloc[j]))
+            d1 = d.loc[d['Z']==z[i]]
+            p5=out_p+r'\raman_linescan.txt'
+            with open(p5, 'w', encoding="utf8", errors="ignore") as f:
+                for j in range(len(d1['Wave'])):
+                    f.write(str(d1['Wave'].iloc[j]))
                     f.write('\t')
-                    f.write(str(d_z['Intensity'].iloc[j]))
+                    f.write(str(d1['Intensity'].iloc[j]))
                     f.write('\n')
-            data_processing = fun(p_out_z, p_out)
+            n = fun(p5, p_out)
             try:
-                data_processing.run()
-                c.append(data_processing.concentration_m)
+                n.run()
+                c.append(n.concentration_m)
             except ZeroDivisionError:
                 c.append(np.nan)       
         print('【Processing '+str(t)+'】')
-        e[t] = (z,c,d)
-    meta['raman_t'] = np.array(range(n)).tolist()
-    meta['z_list'] = z
-
+        e[t] = (z,c)
     print('【All Evaluated】')
-    return e,z,meta
+    return e,z
+
 
 
 

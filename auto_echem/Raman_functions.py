@@ -23,6 +23,23 @@ from auto_echem.general_functions import outliers
 from scipy       import integrate
 import numpy             as np
 
+import os
+
+def create_path_if_not_exists(path):
+    if not os.path.exists(path):
+        try:
+            os.makedirs(path)
+            print(f"Path '{path}' created successfully.")
+        except OSError as e:
+            print(f"Error creating path '{path}': {e}")
+    else:
+        print(f"Path '{path}' already exists.")
+
+# Example usage:
+path_to_create = 'example_folder'
+
+create_path_if_not_exists(path_to_create)
+
 ### Old Functions which need to be updated...
 class Peak():
 	def __init__(self, path_to_input, dst_dir):

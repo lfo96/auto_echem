@@ -251,7 +251,7 @@ def evacut_LFO(eva_class):
     for i,entry in enumerate(eva):
         time = time_cp_h[i]
         if time >=0:
-            eva_cut[entry-int(start_index)] = eva[entry] # Create a new eva_cut with index that correspoinds to timestamps in hour from onset of CC.
+            eva_cut[entry-int(round(start_index))] = eva[entry] # Create a new eva_cut with index that correspoinds to timestamps in hour from onset of CC.
         else:
             c_ini_mean.append(np.nanmean(eva[entry][1][3:-3]))
             plt.scatter(np.array(eva[entry][0][3:-3])/1000,eva[entry][1][3:-3])
@@ -263,6 +263,7 @@ def evacut_LFO(eva_class):
         eva_class.c_ini = c_ini
     eva_class.eva_cut = eva_cut
     return
+
 
 def plot_concgradient(eva, time_steps=23/60, list_del =[], save =''):
     '''    
@@ -718,7 +719,12 @@ def calc_X(eva_class,list_del = []):
 
 
     
-    eta_c = eta_c[keys] # just pick the overpotentials where a and b values are avaiable.
+    if len(keys)==len(eta_c):
+        pass
+    else:
+        # just pick the overpotentials where a and b values are avaiable.
+        eta_c = eta_c[keys]
+    
     # get 【x-axis】 array: which is ln(Cs,z=L /Cs,z=0)
     x_axis=[0] # The first data is meaningless, set to 0
     x_axis_std=[0] # The first data is meaningless, set to 0

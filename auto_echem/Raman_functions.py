@@ -224,6 +224,8 @@ def mean_ramanscan_time(meas_index,timestamp):
 class eva_concgradient():
     def __init__(self, p_echem):
         echem =  auto(p_echem,circ = ['Rp','Rp'],lf_limit=1, hf_limit=10000)
+        echem['electrode surface area'] = 0.4*0.4*np.pi
+        print('Electrode Surface Area manually set to 0.503 cm2.')
         self.echem = echem
         t_OCV = float(echem['data']['2 OCV']['time/s'].iloc[-1]/3600)
         self.t_OCV = t_OCV

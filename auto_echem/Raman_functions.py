@@ -666,7 +666,7 @@ def calc_t_hittorf(eva_class, i, f, side = 'strip', t = '', SVF=1.08):
     Insert eva_class, the start (ini) and final index used for the time difference and the stripping or platting side used.
     Returns tranference number 
     '''
-    
+    F=96485.3321      #unit:s A / mol
     I_areal = eva_class.I_areal
     if t =='':
         t_linescan = eva_class.time_CP[eva_class.time_CP>0]

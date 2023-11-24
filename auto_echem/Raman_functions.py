@@ -141,7 +141,130 @@ def concloading_LFO(raman_p,out_p,fun,meas_index = []):
     print('【All Evaluated】')
     return e,z
 
+## External Reference Data Processing
+from  BaselineRemoval  import  BaselineRemoval
+def BL_removal(y_data):
+    baseObj = BaselineRemoval(y_data) 
+    # 3 way to do baseline subtraction
+    # Modpoly_output = baseObj.ModPoly (polynomial_Degree) 
+    # Imodpoly_output = baseObj.IModPoly (polynomial_Degree)
+    Zhangfit_output = baseObj.ZhangFit()
+    return(Zhangfit_output)
 
+import numpy as np
+from scipy.optimize import curve_fit
+def gaussian(x, A, mu, sigma):
+    """
+    Gaussian function.
+
+    Parameters:
+    - x: Independent variable.
+    - A: Amplitude of the Gaussian.
+    - mu: Mean (center) of the Gaussian.
+    - sigma: Standard deviation of the Gaussian.
+
+    Returns:
+    - Value of the Gaussian at x.
+    """
+    return A * np.exp(-(x - mu)**2 / (2 * sigma**2))
+
+def fit_gaussian_to_data(x_data, y_data):
+    """
+    Fit a Gaussian function to experimental data.
+
+    Parameters:
+    - x_data: Independent variable data.
+    - y_data: Dependent variable data.
+
+    Returns:
+    - A tuple (A, mu, sigma) representing the parameters of the fitted Gaussian.
+    """
+    # Initial guesses for the Gaussian parameters
+    initial_guess = (max(y_data), np.mean(x_data), np.std(x_data))
+
+    # Use curve_fit to fit the Gaussian function to the data
+    params, covariance = curve_fit(gaussian, x_data, y_data, p0=initial_guess)
+
+    # Extract the fitted parameters
+    A, mu, sigma = params
+
+    return A, mu, sigma
+
+def peak_ratio(pathway, BLR = False, BL_FSI = [], BL_G4 = [], wn_min = 680,wn_max = 760):
+    '''
+    Enter pathway of Raman line scan, specify of Baseline removal should be done, provide OCV BL correction data from OCV measurement for FSI (which corresponds to int_norm_FSI) and/or for G4 (which corresponds to int_norm_G4) and wavenumber range for FSI peak integration.
+    Returns eva, np.array(z_list)/1000,ref_max_wn, ref_max_lst, int_G4, int_norm_G4, int_norm_FSI, int_normG4_FSI
+    '''
+    df = pd.read_csv(pathway, sep='\s+')
+    eva = {}
+    try:
+        z_list = list(dict.fromkeys(df['#Z'].tolist()))
+    except KeyError:
+        df['#Z']=len(df)*[0]
+        z_list = [0]
+
+    ref_max_lst = []
+    ref_max_wn = []
+    int_norm_FSI = []
+    int_normG4_FSI = []
+    int_G4 = []
+    int_norm_G4 = []
+    
+    for i,z_i in enumerate(z_list):
+        if BLR == True:
+            df_z = df.loc[df['#Z']==z_i].copy()
+            df_z['#Intensity'] = BL_removal(df_z['#Intensity'])
+        else:
+            df_z = df.loc[df['#Z']==z_i].copy()
+        
+        # df for the reference peak - integrate or peak max? Also which range for reference peak
+        df_z_ref = df_z.loc[(df_z['#Wave']>=407.5) & (df_z['#Wave']<=425)]
+        #df_z_ref = df_z.loc[(df_z['#Wave']>=1060) & (df_z['#Wave']<=1080)]
+        #df_z_ref = df_z.loc[(df_z['#Wave']>=635) & (df_z['#Wave']<=650)]
+        
+        A, mu, sigma = fit_gaussian_to_data(df_z_ref['#Wave'],df_z_ref['#Intensity'])
+        x_data = np.linspace(df_z_ref['#Wave'].iloc[0], df_z_ref['#Wave'].iloc[-1], 1000)
+        max_index = np.argmax(gaussian(x_data,A,mu,sigma))
+        # Use the index to get the corresponding x value from x_data and save the ref max wavenumber (can be used for T determination)
+        x_at_max = x_data[max_index]
+        ref_max_wn.append(x_at_max)
+        
+        # Decide which kind of reference max caclulation
+        ref_max = gaussian(x_data,A,mu,sigma).max()
+        #ref_max = df_z_ref['#Intensity'].max()
+        #ref_max = simps(df_z_ref['#Intensity'])
+        df_z['#Intensity_norm'] = df_z['#Intensity']/ref_max  
+        ref_max_lst.append(ref_max)
+        
+        # solvent integration
+        df_G4 = df_z.loc[df_z['#Wave']>=1400]
+        # int = df_G4['#Intensity_norm'].max()
+        int = df_G4['#Intensity'].max()
+        int_G4.append(int)
+        df_z['#Intensity_normG4'] = df_z['#Intensity']/int
+        
+        int_norm = df_G4['#Intensity_norm'].max()
+        if len(BL_G4)!= 0:
+            G4_BLcorrection = BL_G4[i]
+            factor = int_norm/G4_BLcorrection
+            int_norm_G4.append(factor)
+        else:
+            int_norm_G4.append(int_norm)
+        
+        # FSI Concentration determination by integrating the Raman spectre in between wn_min and wn_max
+        df_FSI = df_z.loc[(df_z['#Wave'] >= wn_min) & (df_z['#Wave'] <= wn_max)]
+        int = simps(df_FSI['#Intensity_norm'])
+        if len(BL_FSI)!= 0:
+            FSI_BLcorrection = BL_FSI[i]
+            factor = int/FSI_BLcorrection
+            int_norm_FSI.append(factor)
+        else:
+            int_norm_FSI.append(int)
+
+        int_normG4_FSI.append(simps(df_FSI['#Intensity_normG4']))
+
+        eva[z_i/1000] = df_z
+    return(eva, np.array(z_list)/1000,ref_max_wn, ref_max_lst, int_G4, int_norm_G4, int_norm_FSI, int_normG4_FSI)
 
 
 ## Functions to determine the time for a raman linescan
@@ -616,7 +739,7 @@ def calc_D(eva_class, list_del = []):
     return
 
 #def calc_t(J,Dapp,total_file_number,Raman_time_stepa_list,a_list_err,v_z,solvent_velocity_factor,list1,Raman_time_step):
-def calc_t(eva_class, solvent_velocity_factor = 1.08, v_z = 1,list_del = []):
+def calc_t(eva_class, solvent_velocity_factor = 1.08, v_z = 1,list_del = [], error_thresh = 0.2):
     a_list = eva_class.a_list
     a_list_err = eva_class.a_list_err
     J = eva_class.I_areal
@@ -631,20 +754,21 @@ def calc_t(eva_class, solvent_velocity_factor = 1.08, v_z = 1,list_del = []):
     a_array =np.array(a_list)
     a_err_array=np.array(a_list_err)
 
-    # define the indices to delete
-    indices_to_delete = list_del
-    # this step is going to delete bad fits
-    a_array = np.delete(a_array, indices_to_delete)
-    time_array = np.delete(time_array, indices_to_delete)
-    a_err_array= np.delete(a_err_array, indices_to_delete)
-
-    #based on the equation, calculate t+0 at different time 
-    t0_array =[]
-    
+    #based on the equation, calculate t+0 at different time  
     t0_array = 1+solvent_velocity_factor*(v_z*F*Dapp*a_array)/J
     tplus0_error_indi = solvent_velocity_factor*a_err_array*v_z*F*Dapp
+    
+    #a_out, a_err_out = detect_outlier(a_list), detect_outlier(a_list_err)
+    exceeding_indexes = [i for i, value in enumerate(tplus0_error_indi) if value > error_thresh]
+    #print('Possible outliers detected: '+str(a_out)+' and '+str(a_err_out))
+    print('Index values where error exceeds '+str(error_thresh)+': '+str(exceeding_indexes))
+   
 
-    #calculate the mean and standard diveiation of t0
+    # this step is going to delete bad fits
+    t0_array = np.delete(t0_array, list_del)
+    time_array = np.delete(time_array, list_del)
+    tplus0_error_indi = np.delete(tplus0_error_indi, list_del)
+    
     tplus0 = np.mean(t0_array)
     tplus0_std = np.std(t0_array)
 
@@ -654,11 +778,10 @@ def calc_t(eva_class, solvent_velocity_factor = 1.08, v_z = 1,list_del = []):
     plt.scatter(time_array,t0_array)
     plt.errorbar(time_array,t0_array, yerr=tplus0_error_indi, alpha=0.5,ecolor ='black',elinewidth=0.5,capsize=5,capthick=0.5,linestyle="none")
     layout(ax, x_label='time (h)', y_label='transference number')
-    a_out, a_err_out = detect_outlier(a_list), detect_outlier(a_list_err)
-    print('Possible outliers detected: '+str(a_out)+' and '+str(a_err_out))
-    print("Cation Transference number ="+str(tplus0)+" ±",tplus0_std)
+
     eva_class.t_0 = tplus0
     eva_class.t_0_err = tplus0_std 
+    print("Cation Transference number ="+str(tplus0)+" ±",tplus0_std)
     return()
 
 def calc_t_hittorf(eva_class, i, f, side = 'strip', t = '', SVF=1.08):
@@ -717,10 +840,8 @@ def lin_fit_calct(eva_class,cut_off_time_h = 5):
     y_fit = slope * np.array(x) + intercept
     t_0_h_plate = calc_t_hittorf(eva_class,0,-1,y_fit,x)
     plt.plot(x,y_fit,label = str(round(t_0_h_plate,2)))
-
-
-
     layout(ax, y_label = 'Integrated Concentration', x_label='time (h)')
+    
     return(t_0_h,t_0_h_plate)
 
 def plot_OP(eva_class):
@@ -772,6 +893,51 @@ def plot_OP(eva_class):
 
     plt.tight_layout()
 
+def find_time_match(eva_class):
+    '''
+    Insert eva_class.
+    Finds mathcing time stamps of the Raman linescans and the echem data.
+    Returns index of the time_cp (raman) timestamps that should be used an index of the EIS measuremetns that should be used.
+    '''
+    CP_PEIS = eva_class.echem['data']['4 PEIS']
+    cy_no = 0
+    CP_PEIS_time = []
+    for index in range(len(CP_PEIS)):
+        if CP_PEIS['cycle number'].iloc[index]!=cy_no:
+            time_EIS = CP_PEIS['time/s'].iloc[index]
+            CP_PEIS_time.append(time_EIS)
+            cy_no = CP_PEIS['cycle number'].iloc[index]
+    CP_PEIS_time = (np.array(CP_PEIS_time)-CP_PEIS_time[0])/3600
+    time_CP_pos = eva_class.time_CP[eva_class.time_CP > 0]
+    min_index_lst = []
+    time_cut = []
+    time_cut_index = []
+    if len(time_CP_pos)>len(CP_PEIS_time):
+        for i,entry in enumerate(CP_PEIS_time):
+            time_dif = abs(time_CP_pos-entry).min()
+            if time_dif <= 1:
+                # Only return the time stamps if they are within 1h of time difference
+                min_index = np.argmin(abs(time_CP_pos-entry))
+                min_index_lst.append(min_index)
+                time_cut.append(entry)
+                time_cut_index.append(i)
+            else:
+                print('Echem and Raman measurements are too far apart in the '+str(i)+'th EIS measurement: '+ str(round(time_dif,2))+'h')
+                continue
+        #return(time_CP_pos[min_index_lst],time_cut) #this would reeturn the time arrays
+        return(min_index_lst,time_cut_index)
+    else:
+        for i,entry in enumerate(time_CP_pos):
+            time_dif = abs(CP_PEIS_time-entry).min()
+            if time_dif <= 1:
+                min_index = np.argmin(abs(CP_PEIS_time-entry))
+                min_index_lst.append(min_index)
+                time_cut.append(entry)
+                time_cut_index.append(i)
+            else:
+                print('Echem and Raman measurements are too far apart in the '+str(i)+'th Raman linescan: '+ str(round(time_dif,2))+'h')
+                continue
+        return(time_cut_index,min_index_lst)
 
 def calc_X(eva_class,list_del = []):
     '''
@@ -794,23 +960,16 @@ def calc_X(eva_class,list_del = []):
     t = eva_class.t_0
     t_err = eva_class.t_0_err
     eta_c = eva_class.eta_c
-    a_list, b_list, a_list_err, b_list_err = eva_class.a_list, eva_class.b_list, eva_class.a_list_err, eva_class.b_list_err
     c_ini = eva_class.c_ini
     z_max = eva_class.z_valuesCut
-    keys = list(dict.keys(eva_class.eva_cut))
-
+    # a_list, b_list, a_list_err, b_list_err = eva_class.a_list, eva_class.b_list, eva_class.a_list_err, eva_class.b_list_err
+ 
     F=96485.3321      #unit:s A / mol
     R=8.314           #J/(mol·K）
-    
-
-
-    
-    if len(keys)==len(eta_c):
-        pass
-    else:
-        # just pick the overpotentials where a and b values are avaiable.
-        eta_c = eta_c[keys]
-    
+    t_linescan, t_CP_PEIS = find_time_match(eva_class)
+    a_list, b_list, a_list_err, b_list_err = [eva_class.a_list[i] for i in t_linescan],[eva_class.b_list[i] for i in t_linescan], [eva_class.a_list_err[i] for i in t_linescan], [eva_class.b_list_err[i] for i in t_linescan]
+    eta_c = eta_c[t_CP_PEIS]
+       
     # get 【x-axis】 array: which is ln(Cs,z=L /Cs,z=0)
     x_axis=[0] # The first data is meaningless, set to 0
     x_axis_std=[0] # The first data is meaningless, set to 0
@@ -828,7 +987,7 @@ def calc_X(eva_class,list_del = []):
         std_dev = np.sqrt((df_da * aerr) ** 2 + (df_db * berr) ** 2)
         return std_dev
 
-    for i in range(1,len(a_list),1):
+    for i in range(1,len(a_list)):
         func_z_final = func(z_max,a_list[i],b_list[i])
         func_z_0 = func(0,a_list[i],b_list[i])
         x_axis.append(-math.log(func_z_final/func_z_0))

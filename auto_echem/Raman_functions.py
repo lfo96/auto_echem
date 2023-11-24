@@ -939,7 +939,7 @@ def find_time_match(eva_class):
                 continue
         return(time_cut_index,min_index_lst)
 
-def calc_X(eva_class,list_del = []):
+def calc_X(eva_class,list_del = [], error_thresh = 1):
     '''
     param eva_good: the eva dict without outliers
     param T: temperature
@@ -1037,7 +1037,9 @@ def calc_X(eva_class,list_del = []):
     plt.plot(x_fit, y_fit, label='fit'+'X='+str(round(K,3))+"±"+str(round(x_std[0],3)))
     layout(ax, x_label ='ln(c${_s}_{z=L}$ /c${_s}_{z=0}$)', y_label='$η_{c}$ F/2RT(1-t${_+^0}$)')
     
-
+    x_outlier, y_outlier = [i for i, value in enumerate(x_axis_std) if value > error_thresh], [i for i, value in enumerate(y_axis_std) if value > error_thresh]
+    #x_outlier, y_outlier = detect_outlier(x_axis_std), detect_outlier(y_axis_std)
+    print('Possible outliers detected where error exceeds '+str(error_thresh)+' for x_error: '+str(x_outlier)+' and y_error: '+str(y_outlier))
     #plt.savefig(p10,transparent = True)   
     eva_class.X = K
     eva_class.X_err = x_std[0] 

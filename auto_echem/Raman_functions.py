@@ -12,6 +12,7 @@ import math
 import matplotlib as mpl
 from scipy       import integrate, special,optimize
 from scipy       import integrate, special,optimize
+from scipy.integrate import simps
 from auto_echem.auto import auto
 import matplotlib.cm     as cm
 from lmfit       import Model, Parameters, minimize, fit_report

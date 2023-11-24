@@ -510,7 +510,7 @@ def curvefitting_LFO(eva_class):
         area_plate_err_list.append(area_plate_err)
         area_strip_err_list.append(area_strip_err)
 
-    layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)', y_lim=[0.5,1.5])
+    layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)')
     fig,ax = plt.subplots()
     plt.scatter(range(len(chi_lst)),chi_lst)
     layout(ax, x_label='Measurement Index', y_label= 'chi squared') 
@@ -668,14 +668,14 @@ def calc_t_hittorf(eva_class, i, f, side = 'strip', t = '', SVF=1.08):
     '''
     F=96485.3321      #unit:s A / mol
     I_areal = eva_class.I_areal
-    if t =='':
+    if np.isscalar(t) and t =='':
         t_linescan = eva_class.time_CP[eva_class.time_CP>0]
     else:
         t_linescan = t
         
-    if side == 'strip':
+    if np.isscalar(side) and side == 'strip':
         A = eva_class.strip_area
-    elif side == 'plate':
+    elif np.isscalar(side) and side == 'plate':
         A = eva_class.plate_area
     else:
         # if A is manually supplied i.e. from linear fit.
@@ -888,10 +888,9 @@ def calc_X(eva_class,list_del = []):
 def calc_cond(eva_class, list_del = [], R_OCV = [], z_cut = True):
     echem = eva_class.echem
     if z_cut == True: 
-        z_max = eva_class.z_valuesCut
+        z_max = np.array(eva_class.z_valuesCut).max()
     else:
-        z_max = eva_class.z_values
-        
+        z_max = np.array(eva_class.z_values).max()
     L = z_max/1000000 # unit: m
     t_OCV = float(echem['data']['2 OCV']['time/s'].iloc[-1]/3600)
     

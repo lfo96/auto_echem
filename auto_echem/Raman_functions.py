@@ -775,7 +775,7 @@ def calc_t(eva_class, solvent_velocity_factor = 1.08, v_z = 1,list_del = [], err
 
     #print the result
     fig,ax = plt.subplots()
-    plt.scatter(time_array,t0_array)
+    plt.scatter(time_array,t0_array, label = str(round(tplus0,2)))
     plt.errorbar(time_array,t0_array, yerr=tplus0_error_indi, alpha=0.5,ecolor ='black',elinewidth=0.5,capsize=5,capthick=0.5,linestyle="none")
     layout(ax, x_label='time (h)', y_label='transference number')
 

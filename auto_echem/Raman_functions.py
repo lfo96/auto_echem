@@ -476,7 +476,7 @@ def curvefitting_LFO(eva_class):
         min_list.append(mi)
 
         x_full_cell = np.linspace(0,z_max, 10000)
-        ax.scatter(x/10000,ydata, color=colors[i])
+        #ax.scatter(x/10000,ydata, color=colors[i])
         ax.plot(x_full_cell/10000, func(x_full_cell, result.params['a'].value, result.params['b'].value), color = colors[i])
 
 
@@ -487,9 +487,30 @@ def curvefitting_LFO(eva_class):
         b_list.append(b[0])
         a_list_err.append(a_err[0])
         b_list_err.append(b_err[0])
+        
+            
+        # Fit integration for transference number calculations.
+                #finding the area under the curve for the plating and stripping side
+        z_lst = x    
+        y_eval = gmodel.eval(result.params, x=z_lst) - c_ini
+        y_eval_strip = y_eval[:int(len(y_eval)/2)]
+        x_strip = z_lst[:int(len(y_eval)/2)]
+        y_eval_plate = y_eval[int(len(y_eval)/2):]
+        x_plate = z_lst[int(len(y_eval)/2):]
+        
+        area_plate = integrate.simps(y_eval_plate, x_plate)
+        area_plate_list.append(area_plate)
+        area_strip = integrate.simps(y_eval_strip, x_strip)
+        area_strip_list.append(area_strip)
+        
+        # the uncertainty band for the fitting and using this integrl as the error
+        dely = result.eval_uncertainty(sigma=1)
+        area_plate_err = integrate.simps(dely[int(len(y_eval)/2):], x_plate)
+        area_strip_err = integrate.simps(dely[:int(len(y_eval)/2)], x_strip)
+        area_plate_err_list.append(area_plate_err)
+        area_strip_err_list.append(area_strip_err)
 
-
-    layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)')
+    layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)', y_lim=[0.5,1.5])
     fig,ax = plt.subplots()
     plt.scatter(range(len(chi_lst)),chi_lst)
     layout(ax, x_label='Measurement Index', y_label= 'chi squared') 
@@ -497,9 +518,10 @@ def curvefitting_LFO(eva_class):
     eva_class.b_list = b_list
     eva_class.a_list_err = a_list_err
     eva_class.b_list_err = b_list_err
-    
-    return
+    eva_class.plate_area, eva_class.plate_area_err = area_plate_list, area_plate_err_list
+    eva_class.strip_area, eva_class.strip_area_err = area_strip_list, area_strip_err_list
         
+    return
 
 def detect_outlier(lst, correction_fac = 2):
     '''
@@ -638,6 +660,68 @@ def calc_t(eva_class, solvent_velocity_factor = 1.08, v_z = 1,list_del = []):
     eva_class.t_0 = tplus0
     eva_class.t_0_err = tplus0_std 
     return()
+
+def calc_t_hittorf(eva_class, i, f, side = 'strip', t = '', SVF=1.08):
+    '''
+    Insert eva_class, the start (ini) and final index used for the time difference and the stripping or platting side used.
+    Returns tranference number 
+    '''
+    
+    I_areal = eva_class.I_areal
+    if t =='':
+        t_linescan = eva_class.time_CP[eva_class.time_CP>0]
+    else:
+        t_linescan = t
+        
+    if side == 'strip':
+        A = eva_class.strip_area
+    elif side == 'plate':
+        A = eva_class.plate_area
+    else:
+        # if A is manually supplied i.e. from linear fit.
+        A = side    
+    delta_t = t_linescan[f]-t_linescan[i]
+    # volume_fraction=(1-c_ini*1000*partial_molar_volumes_salt)
+    # SVF = 1/volume_fraction
+
+    flux = (A[f]-A[i])/1000 #integration was done in mol/L*um; so this unit is  mol/m^2
+    total_charge = 10*I_areal*(delta_t*60*60)    #unit A s /m^2
+
+    t_plus_0_h=1-(flux*F*SVF)/total_charge
+    return(t_plus_0_h)
+
+def lin_fit_calct(eva_class,cut_off_time_h = 5):
+    '''
+    Insert eva_class and a cut_off_time_h in hours which sets the cut off time for the linear fit of the integrated concentration values. Linear fit, and the calculate the transference number in hittorf style.
+    Returns the transference numbert for the stripping and platting side.
+    '''
+    
+    import scipy
+    
+    t = eva_class.time_CP[eva_class.time_CP>0]
+    cut_off_index = np.argmin(abs(t-cut_off_time_h))
+    t = t[:cut_off_index]
+
+    fig,ax = plt.subplots()
+    
+    x,y = t,eva_class.strip_area[:cut_off_index]
+    plt.scatter(x,y, label = 'strip')
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,y)
+    y_fit = slope * np.array(x) + intercept
+    t_0_h = calc_t_hittorf(eva_class,0,-1,y_fit,x)
+    plt.plot(x,y_fit, label = str(round(t_0_h,2)))
+    
+    x,y = t,eva_class.plate_area[:cut_off_index]
+    plt.scatter(x,y, label ='plate')
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,y)
+    y_fit = slope * np.array(x) + intercept
+    t_0_h_plate = calc_t_hittorf(eva_class,0,-1,y_fit,x)
+    plt.plot(x,y_fit,label = str(round(t_0_h_plate,2)))
+
+
+
+    layout(ax, y_label = 'Integrated Concentration', x_label='time (h)')
+    return(t_0_h,t_0_h_plate)
 
 def plot_OP(eva_class):
     echem = eva_class.echem

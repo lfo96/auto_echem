@@ -442,7 +442,7 @@ def plot_concgradient(eva, time_steps=23/60, list_del =[], save =''):
         plt.savefig(save+'.svg',transparent = True)
 
 def eva_cutZ(eva_class, z_del = []):
-    '''"Version 8.0 LiFSIG4 50sp 20231109.ipynb"
+    '''
     Enter eva and the z_value index to remove from z. Returns a trimmed eva. Adjust the z_values if from the head is cut off (i.e. if first point is unsufficient signal, delete that and set the second z value to zero.)
     '''
     eva = eva_class.eva_cut
@@ -450,12 +450,13 @@ def eva_cutZ(eva_class, z_del = []):
     eva_cutZ = {}
     for entry in eva:
         z = np.delete(eva[entry][0], z_del)
-        z = np.array(z)-z[0]
-        c = np.delete(eva[entry][1], z_del)
+        z = list(np.array(z)-z[0])
+        c = list(np.delete(eva[entry][1], z_del))
         eva_cutZ[entry] = [z,c]
     eva_class.eva_cutZ = eva_cutZ
     eva_class.z_valuesCut = eva_cutZ[list(dict.keys(eva_cutZ))[0]][0][-1]
     return
+
 
 from copy import deepcopy
 
@@ -531,7 +532,11 @@ def removeoutliers_LFO(eva_class, s=0.05, save = ''):
     fig,ax = plt.subplots()
     plt.scatter(range(len(chi_lst)),chi_lst)
     layout(ax, x_label='Measurement Index', y_label= 'chi squared') 
-    eva_class.eva_good = e_good
+    # Convert to list to make it json serizable
+    def convert_np_arrays_to_lists(d):
+        return {k: v.tolist() if isinstance(v, np.ndarray) else v for k, v in d.items()}
+    e_good_lst = convert_np_arrays_to_lists(e_good)
+    eva_class.eva_good = e_good_lst
     return
 
 # Lorenz edited Functions
@@ -723,7 +728,7 @@ def calc_D(eva_class, list_del = []):
     #plot the fit equation on the figure
     x_fit = np.arange(time_sq.min(),time_sq.max(),0.5)
     y_fit = K*x_fit+B
-    plt.plot(x_fit,y_fit, label = 'fit')
+    plt.plot(x_fit,y_fit, label = str(round(D_EVF*1e10,2))+'$\mathregular{\cdot 10^{-10} m^2\,s^{-1}}$')
 
 
     
@@ -1090,4 +1095,56 @@ def calc_cond(eva_class, list_del = [], R_OCV = [], z_cut = True):
     eva_class.k_ionic_err = k_ionic_error
     print("ionic conductivity is: "+str(k_ionic)+"±"+str(k_ionic_error)+"  mS cm-1")
     return
+
+# Export of eva_class as JSON file
+import json
+import pandas as pd
+import numpy as np
+
+def convert_to_json_serializable(value):
+    """Converts a value to a JSON serializable format."""
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    elif isinstance(value, pd.DataFrame):
+        return value.to_dict(orient='records')
+    elif isinstance(value, pd.Series):
+        # Convert Pandas Series to a dictionary with 'values' key
+        return {'values': value.values.tolist()}
+    elif isinstance(value, dict):
+        return {k: convert_to_json_serializable(v) for k, v in value.items()}
+    elif isinstance(value, list):
+        return [convert_to_json_serializable(item) for item in value]
+    else:
+        return value
+
+def convert_dict_to_json_serializable(input_dict):
+    """Converts a dictionary to a JSON serializable format."""
+    return {k: convert_to_json_serializable(v) for k, v in input_dict.items()}
+
+
+def save_evaclass_LFO(self):
+    """ Exports a model to JSON
+
+    Parameters
+    ----------
+    filepath: str
+        Destination for exporting model object
+    It converts all the entries into JSON serizable objeccts. It struggles with the echem dictinoiary so will leave that out for the moment :(
+    """
+    members = [attr for attr in dir(self) if not callable(getattr(self, attr)) and not attr.startswith("__")]
+   
+    exp_name = self.p_raman.split('\\')[-1][:-1]
+    pathway =self.p_out+'\\'+exp_name+'.json'
+    eva_dict = {}
     
+    for entry in members:
+        if entry == 'echem':
+            continue
+        else:
+            attr_value = getattr(self, entry)
+            eva_dict[entry] = convert_to_json_serializable(attr_value)
+    
+    with open(pathway, 'w') as f:
+        json.dump(eva_dict, f)
+    print(exp_name+' was exported as a eva_class json object to '+str(pathway))           
+    return()

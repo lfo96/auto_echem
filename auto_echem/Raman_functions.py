@@ -1139,6 +1139,7 @@ def save_evaclass_LFO(self):
     
     for entry in members:
         if entry == 'echem':
+            print('echem cannot be converted to serizable object and thus exported to JSON.')
             continue
         else:
             attr_value = getattr(self, entry)

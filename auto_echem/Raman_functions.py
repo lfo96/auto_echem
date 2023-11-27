@@ -1149,3 +1149,12 @@ def save_evaclass_LFO(self):
         json.dump(eva_dict, f)
     print(exp_name+' was exported as a eva_class json object to '+str(pathway))           
     return()
+
+def open_evaclass_JSON(pathway):
+    '''
+    Open eva_class json file from concentration gradient analysis.  
+    '''
+    eva = {}
+    with open(pathway, 'r') as json_file:
+        eva = json.load(json_file)
+    return(eva)           

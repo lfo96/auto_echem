@@ -935,7 +935,7 @@ def find_time_match(eva_class, time_dif_value = 1):
     else:
         for i,entry in enumerate(time_CP_pos):
             time_dif = abs(CP_PEIS_time-entry).min()
-            if time_dif <= 1:
+            if time_dif <= time_dif_value:
                 min_index = np.argmin(abs(CP_PEIS_time-entry))
                 min_index_lst.append(min_index)
                 time_cut.append(entry)

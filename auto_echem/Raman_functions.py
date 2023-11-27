@@ -605,7 +605,7 @@ def curvefitting_LFO(eva_class):
         min_list.append(mi)
 
         x_full_cell = np.linspace(0,z_max, 10000)
-        #ax.scatter(x/10000,ydata, color=colors[i])
+        ax.scatter(x/10000,ydata, color=colors[i])
         ax.plot(x_full_cell/10000, func(x_full_cell, result.params['a'].value, result.params['b'].value), color = colors[i])
 
 

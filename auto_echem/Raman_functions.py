@@ -1150,7 +1150,7 @@ def save_evaclass_LFO(self):
     print(exp_name+' was exported as a eva_class json object to '+str(pathway))           
     return()
 
-def open_evaclass_JSON(pathway):
+def load_evaclass_JSON(pathway):
     '''
     Open eva_class json file from concentration gradient analysis.  
     '''

@@ -899,7 +899,7 @@ def plot_OP(eva_class):
 
     plt.tight_layout()
 
-def find_time_match(eva_class):
+def find_time_match(eva_class, time_dif_value = 1):
     '''
     Insert eva_class.
     Finds mathcing time stamps of the Raman linescans and the echem data.
@@ -921,7 +921,7 @@ def find_time_match(eva_class):
     if len(time_CP_pos)>len(CP_PEIS_time):
         for i,entry in enumerate(CP_PEIS_time):
             time_dif = abs(time_CP_pos-entry).min()
-            if time_dif <= 1:
+            if time_dif <= time_dif_value:
                 # Only return the time stamps if they are within 1h of time difference
                 min_index = np.argmin(abs(time_CP_pos-entry))
                 min_index_lst.append(min_index)
@@ -945,7 +945,7 @@ def find_time_match(eva_class):
                 continue
         return(time_cut_index,min_index_lst)
 
-def calc_X(eva_class,list_del = [], error_thresh = 1):
+def calc_X(eva_class,list_del = [], error_thresh = 1, time_dif_value = 1):
     '''
     param eva_good: the eva dict without outliers
     param T: temperature
@@ -972,7 +972,7 @@ def calc_X(eva_class,list_del = [], error_thresh = 1):
  
     F=96485.3321      #unit:s A / mol
     R=8.314           #J/(mol·K）
-    t_linescan, t_CP_PEIS = find_time_match(eva_class)
+    t_linescan, t_CP_PEIS = find_time_match(eva_class,time_dif_value)
     a_list, b_list, a_list_err, b_list_err = [eva_class.a_list[i] for i in t_linescan],[eva_class.b_list[i] for i in t_linescan], [eva_class.a_list_err[i] for i in t_linescan], [eva_class.b_list_err[i] for i in t_linescan]
     eta_c = eta_c[t_CP_PEIS]
        

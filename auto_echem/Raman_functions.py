@@ -267,6 +267,116 @@ def peak_ratio(pathway, BLR = False, BL_FSI = [], BL_G4 = [], wn_min = 680,wn_ma
         eva[z_i/1000] = df_z
     return(eva, np.array(z_list)/1000,ref_max_wn, ref_max_lst, int_G4, int_norm_G4, int_norm_FSI, int_normG4_FSI)
 
+def eva_load_extref(eva_class):
+    '''
+    Insert p_raman pathway. Returns a eva dictioniary with the peak_ratio evaluated files.
+    '''
+    
+    p_raman = eva_class.p_raman
+    folder = ('\\').join(p_raman.split('\\')[:-1])
+    direc_files = list_files_with_last_modified_sorted(folder)
+    auto_expo_files = []
+    for entry in direc_files:
+        if entry[0].split('.')[-1] == 'txt' and entry[0].split('.')[0].split('_')[-1].isdigit() == True:
+            auto_expo_files.append(entry[0])
+    eva = {}
+    for entry in auto_expo_files:
+        index = int(entry.split('.')[0].split('_')[-1])
+        try:
+            eva_i = peak_ratio(folder+'\\'+entry, BLR=True)
+        except RuntimeError:
+            print(str(index)+' timed out.')
+            continue
+        eva[index] = eva_i
+        print(str(index)+' processed.')
+    eva_class.eva_extref_noBL = eva
+    eva_class.auto_expo_txt = auto_expo_files
+    return
+
+def create_BL_OCV(eva_class,start = '', stop = ''):
+    '''
+    Insert eva_class which has a eva defined from eva_load_extref.
+    '''
+    t_OCV, t_linescan = eva_class.t_OCV, eva_class.t_linescan
+    eva_extref_noBL = eva_class.eva_extref_noBL
+    start_index = t_OCV/t_linescan
+    print("The index when current applied is "+str(round(start_index,2)))
+    
+    # Create Baseline of Sapphire Reference Signal from OCV condition (where system is under thermal equilibirum)
+    if start =='' and stop =='':
+        start, stop = 3, int(start_index)
+        
+    int_FSI_lst = []
+    int_G4_lst = []
+    for counter,i in enumerate(range(start,stop)):
+        int_G4 = pd.Series(np.array(eva_extref_noBL[i][5]))
+        int_G4_lst.append(int_G4)
+        int_FSI = pd.Series(np.array(eva_extref_noBL[i][6]))
+        int_FSI_lst.append(int_FSI)
+        
+    int_FSI_concat = pd.concat(int_FSI_lst, axis =1)
+    int_FSI_mean, int_FSI_std = int_FSI_concat.mean(axis=1),int_FSI_concat.std(axis=1)
+    
+    int_G4_concat = pd.concat(int_G4_lst, axis =1)
+    int_G4_mean, int_G4_std = int_G4_concat.mean(axis=1),int_G4_concat.std(axis=1)
+    
+    eva_class.start_index = int(start_index)
+    eva_class.int_FSI_mean, eva_class.int_FSI_std = int_FSI_mean, int_FSI_std
+    eva_class.int_G4_mean, eva_class.int_G4_std = int_G4_mean, int_G4_std
+    return
+
+def eva_OCV_BL(eva_class):
+    '''
+    Insert eva_class and do the baseline correction
+    '''
+    auto_expo_txt = eva_class.auto_expo_txt
+    int_FSI_mean = eva_class.int_FSI_mean
+    int_G4_mean = eva_class.int_G4_mean
+    p_raman = eva_class.p_raman
+    folder = ('\\').join(p_raman.split('\\')[:-1])
+    eva_extref = {}
+    for entry in auto_expo_txt:
+        index = int(entry.split('.')[0].split('_')[-1])
+        eva_i = peak_ratio(folder+'\\'+entry, BLR=True, BL_G4 = int_G4_mean, BL_FSI = int_FSI_mean)
+        eva_extref[index] = eva_i
+        print(str(index)+' processed.')
+    eva_class.eva_extref = eva_extref
+    return
+
+def plot_gradient_BLcorrected(eva_class):
+    keys = list(dict(eva_class.eva_extref).keys())
+    start_index = eva_class.start_index
+    start, stop = 0, start_index
+    fig,ax = plt.subplots()
+    colors = color_gradient(stop-start)
+    for counter,i in enumerate(range(start,stop)):
+        plt.scatter(eva_class.eva_extref[i][1][1:], eva_class.eva_extref[i][6][1:],  color = colors[counter])
+    layout(ax, x_label='Z (um)', y_label = 'Normalized Peak Change',  title = 'OCV')
+    
+    start, stop = start_index,keys[-1]
+    fig,ax = plt.subplots()
+    colors = color_gradient(stop-start)
+    for counter,i in enumerate(range(start,stop)):
+        plt.scatter(eva_class.eva_extref[i][1][1:], eva_class.eva_extref[i][6][1:],  color = colors[counter])
+    layout(ax, x_label='Z (um)', y_label = 'Normalized Peak Change',  title = 'CP')
+    
+    return
+
+def convert_to_eva(eva_ini):
+    '''
+    Convert the prepared eva_class.eva_extref into a eva_final in the same form as the conventional analysis has happened.
+    '''
+    eva_final = {}
+    for i,entry in enumerate(eva_ini):
+        z_lst = list(np.array(eva_ini[entry][1])*1000) # convert back to um
+        FSI_conc = eva_ini[entry][6] # FSI concentration
+        eva_final[i] = [z_lst,FSI_conc]
+    return(eva_final)
+
+    
+    
+    
+    
 
 ## Functions to determine the time for a raman linescan
 import os

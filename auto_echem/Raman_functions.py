@@ -696,6 +696,15 @@ def noneTOnan(list):
     else:
         return(list)
 
+def int_loss_detection(int_list_norm, int_thresh = 0.3):
+    '''
+    Insert the normalized intensity list (derived from the int_norm_map[cy] at a given cycle) and return the x-index where not enough signal was measured.
+    '''
+    sig_loss = int_list_norm < int_thresh
+    sig_loss_ix = np.where(sig_loss)[0]
+    return(sig_loss_ix)
+
+
 def curvefitting_LFO(eva_class, int_loss_filter = 0.3, strip_only = False):
     if hasattr(eva_class,'eva_good'):
         eva = eva_class.eva_good

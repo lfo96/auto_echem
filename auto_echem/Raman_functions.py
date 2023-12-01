@@ -362,6 +362,36 @@ def plot_gradient_BLcorrected(eva_class):
     
     return
 
+def signal_integration_map(eva_class, plot = True):
+    '''
+    Insert eva_class which contains the BLR corrected Intensity_norm eva's named eva_class.eva_extref and add the intensity map (integrated from 425 till the end) for all z and t values under eva_class.int_map
+    '''
+    eva = eva_class.eva_extref
+    z_lst = list(eva[0][0].keys())
+    I_int = []
+    for entry in eva:
+        I_int_z = []
+        for z_i in z_lst:
+            df = eva[entry][0][z_i]
+            # t ake out the sapphire reference peak
+            df_int = df.loc[df['#Wave']>425]
+            I_int_i = simps(-df_int['#Intensity_norm'],df_int['#Wave'])
+            I_int_z.append(I_int_i) 
+        I_int.append(I_int_z)
+    eva_class.int_map = I_int
+    eva_class.int_map_norm = (I_int - np.min(I_int)) / (np.max(I_int) - np.min(I_int))
+    
+    if plot == True:
+        # Function to show the heat map
+        plt.imshow(eva_class.int_map_norm, cmap = 'magma', interpolation='none', aspect = 'auto')
+        
+        # Adding details to the plot
+        plt.xlabel('Z (mm)')
+        plt.ylabel('time (h)')
+
+        plt.colorbar()
+    return
+
 def convert_to_eva(eva_ini):
     '''
     Convert the prepared eva_class.eva_extref into a eva_final in the same form as the conventional analysis has happened.
@@ -553,6 +583,7 @@ def plot_concgradient(eva, time_steps=23/60, list_del =[], save =''):
 
 def eva_cutZ(eva_class, z_del = []):
     '''
+    This is purely to remove edge points if the linescan is already on piston height, beyond the electrolyte. Not due to lithium filaments. Z value are being changed!
     Enter eva and the z_value index to remove from z. Returns a trimmed eva. Adjust the z_values if from the head is cut off (i.e. if first point is unsufficient signal, delete that and set the second z value to zero.)
     '''
     eva = eva_class.eva_cut
@@ -563,8 +594,16 @@ def eva_cutZ(eva_class, z_del = []):
         z = list(np.array(z)-z[0])
         c = list(np.delete(eva[entry][1], z_del))
         eva_cutZ[entry] = [z,c]
+    if hasattr(eva_class,'int_map_norm')== True:
+        int_map_norm = eva_class.int_map_norm
+        int_map_norm_cutZ = []
+        for entry in int_map_norm:
+            int_map_norm_cutZ.append(np.delete(entry, z_del))
+        eva_class.int_map_norm = int_map_norm_cutZ
+            
+            
     eva_class.eva_cutZ = eva_cutZ
-    eva_class.z_valuesCut = eva_cutZ[list(dict.keys(eva_cutZ))[0]][0][-1]
+    eva_class.z_valuesCut = eva_cutZ[list(dict.keys(eva_cutZ))[0]][0]
     return
 
 
@@ -657,13 +696,15 @@ def noneTOnan(list):
     else:
         return(list)
 
-def curvefitting_LFO(eva_class):
-    eva = eva_class.eva_good
+def curvefitting_LFO(eva_class, int_loss_filter = 0.3, strip_only = False):
+    if hasattr(eva_class,'eva_good'):
+        eva = eva_class.eva_good
+    else:
+        eva = eva_class.eva_cutZ
     keys = list(dict.keys(eva))
-    z_max = eva_class.z_valuesCut
+    z_max = eva_class.z_valuesCut[-1]
     c_ini = eva_class.c_ini
     chi_lst = []
-    report_list = []
     max_list = []
     min_list = []
     a_list = []
@@ -680,11 +721,22 @@ def curvefitting_LFO(eva_class):
 
     fig,ax = plt.subplots()
     colors = color_gradient(np.array(keys).max()+1)
-    for counter,i in enumerate(keys):
+    for i in keys:
         # set x_axis and y_axis value
         x=np.array(eva[i][0])
         ydata=np.array(eva[i][1])
+        
+        if hasattr(eva_class,'int_map_norm')== True and int_loss_filter is not False: 
+            sig_loss_ix = int_loss_detection(eva_class.int_map_norm[i], int_loss_filter)
+            for ix in sig_loss_ix:
+                ydata[ix] = np.nan
+            print('At measurement number '+str(i)+', the z_value index '+str(sig_loss_ix)+' were set to np.nan')
+        
+        if strip_only != False:
+            mid_ix = np.argmin(abs(x-strip_only*z_max))
+            ydata[mid_ix:] = np.nan
 
+            
         #delete "nan" value in the eva_good
         mask=~np.isnan(ydata)
         ydata=ydata[mask]
@@ -715,7 +767,7 @@ def curvefitting_LFO(eva_class):
         min_list.append(mi)
 
         x_full_cell = np.linspace(0,z_max, 10000)
-        ax.scatter(x/10000,ydata, color=colors[i])
+        ax.scatter(x/10000,ydata, color=colors[i], facecolor = 'none')
         ax.plot(x_full_cell/10000, func(x_full_cell, result.params['a'].value, result.params['b'].value), color = colors[i])
 
 
@@ -724,6 +776,7 @@ def curvefitting_LFO(eva_class):
         #adding the 'a' (interfacial conc gradient) and 'b'	(diffusion length) and associated errors to the list above
         a_list.append(a[0])
         b_list.append(b[0])
+        print(len(b_list))
         a_list_err.append(a_err[0])
         b_list_err.append(b_err[0])
         

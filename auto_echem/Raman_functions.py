@@ -1133,13 +1133,17 @@ def calc_X(eva_class,list_del = [], error_thresh = 1, time_dif_value = 1):
     ---
     return thermodynamic factor
     '''
-    eva = eva_class.eva_good
+    if hasattr(eva_class,'eva_good'):
+        eva = eva_class.eva_good
+    else:
+        eva = eva_class.eva_cutZ
+    
     T = eva_class.temp
     t = eva_class.t_0
     t_err = eva_class.t_0_err
     eta_c = eva_class.eta_c
     c_ini = eva_class.c_ini
-    z_max = eva_class.z_valuesCut
+    z_max = eva_class.z_valuesCut[-1]
     # a_list, b_list, a_list_err, b_list_err = eva_class.a_list, eva_class.b_list, eva_class.a_list_err, eva_class.b_list_err
  
     F=96485.3321      #unit:s A / mol

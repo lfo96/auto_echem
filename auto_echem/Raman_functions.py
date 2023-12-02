@@ -1301,7 +1301,7 @@ def convert_dict_to_json_serializable(input_dict):
     return {k: convert_to_json_serializable(v) for k, v in input_dict.items()}
 
 
-def save_evaclass_LFO(self):
+def save_evaclass_LFO(self, name_add = ''):
     """ Exports a model to JSON
 
     Parameters
@@ -1313,7 +1313,7 @@ def save_evaclass_LFO(self):
     members = [attr for attr in dir(self) if not callable(getattr(self, attr)) and not attr.startswith("__")]
    
     exp_name = self.p_raman.split('\\')[-1][:-1]
-    pathway =self.p_out+'\\'+exp_name+'.json'
+    pathway =self.p_out+'\\'+exp_name+str(name_add)+'.json'
     eva_dict = {}
     
     for entry in members:

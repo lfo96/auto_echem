@@ -785,7 +785,6 @@ def curvefitting_LFO(eva_class, int_loss_filter = 0.3, strip_only = False):
         #adding the 'a' (interfacial conc gradient) and 'b'	(diffusion length) and associated errors to the list above
         a_list.append(a[0])
         b_list.append(b[0])
-        print(len(b_list))
         a_list_err.append(a_err[0])
         b_list_err.append(b_err[0])
         

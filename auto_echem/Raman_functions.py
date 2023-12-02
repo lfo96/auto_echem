@@ -291,6 +291,7 @@ def eva_load_extref(eva_class):
         print(str(index)+' processed.')
     eva_class.eva_extref_noBL = eva
     eva_class.auto_expo_txt = auto_expo_files
+    eva_class.extref = True
     return
 
 def create_BL_OCV(eva_class,start = '', stop = ''):

@@ -1301,6 +1301,17 @@ def convert_dict_to_json_serializable(input_dict):
     """Converts a dictionary to a JSON serializable format."""
     return {k: convert_to_json_serializable(v) for k, v in input_dict.items()}
 
+def convert_eva_extref_serializable(eva_extref):
+    '''
+    Insert eva_extref or eva_extref_noBL and convert into a serializable object to export as json.
+    '''
+    for entry in eva_extref:
+        eva_dict = {}
+        # activate this to convert the raman data into serializable objects. Files will be 250MB per set of data frames respecitvly.
+        # for z in eva_extref[entry][0]:
+        #     eva_dict[z] = eva_extref[entry][0][z].to_dict()
+        eva_extref[entry] = (eva_dict,list(eva_extref[entry][1]),eva_extref[entry][2],eva_extref[entry][3],eva_extref[entry][4],eva_extref[entry][5],eva_extref[entry][6],eva_extref[entry][7])
+    return(eva_extref)
 
 def save_evaclass_LFO(self, name_add = ''):
     """ Exports a model to JSON
@@ -1316,11 +1327,16 @@ def save_evaclass_LFO(self, name_add = ''):
     exp_name = self.p_raman.split('\\')[-1][:-1]
     pathway =self.p_out+'\\'+exp_name+str(name_add)+'.json'
     eva_dict = {}
-    non_serizable = ['echem','eva_extref','eva_extref_noBL']
+    non_serizable = ['echem']
+    need_convert = ['eva_extref_noBL', 'eva_extref']
     for entry in members:
         if entry in non_serizable:
             print(str(entry)+' cannot be converted to serizable object and thus exported to JSON.')
             continue
+        elif entry in need_convert:
+            attr_value = getattr(self, entry)
+            print('Converting to serializable object: '+entry)
+            eva_dict[entry] = convert_eva_extref_serializable(attr_value)
         else:
             attr_value = getattr(self, entry)
             eva_dict[entry] = convert_to_json_serializable(attr_value)

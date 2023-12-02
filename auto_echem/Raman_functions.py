@@ -619,7 +619,7 @@ def removeoutliers_LFO(eva_class, s=0.05, save = ''):
     eva = eva_class.eva_cutZ
     c_ini = eva_class.c_ini
     e_good=deepcopy(eva)
-    z_max = eva_class.z_valuesCut
+    z_max = eva_class.z_valuesCut[-1]
     keys = list(dict.keys(eva))
     colors = color_gradient(np.array(keys).max()+1)
     time = eva_class.time_CP[eva_class.time_CP > 0]
@@ -991,7 +991,7 @@ def calc_t_hittorf(eva_class, i, f, side = 'strip', t = '', SVF=1.08):
     t_plus_0_h=1-(flux*F*SVF)/total_charge
     return(t_plus_0_h)
 
-def lin_fit_calct(eva_class,cut_off_time_h = 5):
+def lin_fit_calct(eva_class,cut_off_time_h = 5, plate = False):
     '''
     Insert eva_class and a cut_off_time_h in hours which sets the cut off time for the linear fit of the integrated concentration values. Linear fit, and the calculate the transference number in hittorf style.
     Returns the transference numbert for the stripping and platting side.
@@ -1012,15 +1012,19 @@ def lin_fit_calct(eva_class,cut_off_time_h = 5):
     t_0_h = calc_t_hittorf(eva_class,0,-1,y_fit,x)
     plt.plot(x,y_fit, label = str(round(t_0_h,2)))
     
-    x,y = t,eva_class.plate_area[:cut_off_index]
-    plt.scatter(x,y, label ='plate')
-    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,y)
-    y_fit = slope * np.array(x) + intercept
-    t_0_h_plate = calc_t_hittorf(eva_class,0,-1,y_fit,x)
-    plt.plot(x,y_fit,label = str(round(t_0_h_plate,2)))
-    layout(ax, y_label = 'Integrated Concentration', x_label='time (h)')
     
-    return(t_0_h,t_0_h_plate)
+    if plate != False:
+        x,y = t,eva_class.plate_area[:cut_off_index]
+        plt.scatter(x,y, label ='plate')
+        slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,y)
+        y_fit = slope * np.array(x) + intercept
+        t_0_h_plate = calc_t_hittorf(eva_class,0,-1,y_fit,x)
+        plt.plot(x,y_fit,label = str(round(t_0_h_plate,2)))
+        layout(ax, y_label = 'Integrated Concentration', x_label='time (h)')
+        return(t_0_h,t_0_h_plate)
+    
+    layout(ax, y_label = 'Integrated Concentration', x_label='time (h)')
+    return(t_0_h)
 
 def plot_OP(eva_class):
     echem = eva_class.echem

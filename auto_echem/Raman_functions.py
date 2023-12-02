@@ -1315,10 +1315,10 @@ def save_evaclass_LFO(self, name_add = ''):
     exp_name = self.p_raman.split('\\')[-1][:-1]
     pathway =self.p_out+'\\'+exp_name+str(name_add)+'.json'
     eva_dict = {}
-    
+    non_serizable = ['echem','eva_extref','eva_extref_noBL']
     for entry in members:
-        if entry == 'echem':
-            print('echem cannot be converted to serizable object and thus exported to JSON.')
+        if entry in non_serizable:
+            print(str(entry)+' cannot be converted to serizable object and thus exported to JSON.')
             continue
         else:
             attr_value = getattr(self, entry)

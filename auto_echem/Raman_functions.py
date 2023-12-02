@@ -705,6 +705,70 @@ def int_loss_detection(int_list_norm, int_thresh = 0.3):
     sig_loss_ix = np.where(sig_loss)[0]
     return(sig_loss_ix)
 
+def plot_gradient_fit(eva_class, int_loss_filter = 0.3, strip_only = False, index = []):
+    if hasattr(eva_class,'eva_good'):
+        eva = eva_class.eva_good
+    else:
+        eva = eva_class.eva_cutZ
+    keys = list(dict.keys(eva))
+    z_max = eva_class.z_valuesCut[-1]
+    c_ini = eva_class.c_ini
+    chi_lst = []
+    def func(x, a, b):
+        return  (a)/1000*((b/(3.1415)**0.5)*np.exp(-((((-x+z_max)/1e6)/b)**2))-((((-x+z_max)/1e6))*special.erfc(((-x+z_max)/1e6)/b)))-(a/1000)*((b/(3.1415)**0.5)*np.exp(-(((((x)/1e6))/b)**2))-((((x)/1e6))*special.erfc(((x)/1e6)/b)))+c_ini
+
+    fig,ax = plt.subplots()
+    colors = color_gradient(np.array(keys).max()+1)
+    for i in index:
+        # set x_axis and y_axis value
+        x=np.array(eva[i][0])
+        ydata=np.array(eva[i][1])
+        
+        if hasattr(eva_class,'int_map_norm')== True and int_loss_filter is not False: 
+            sig_loss_ix = int_loss_detection(eva_class.int_map_norm[i], int_loss_filter)
+            for ix in sig_loss_ix:
+                ydata[ix] = np.nan
+            print('At measurement number '+str(i)+', the z_value index '+str(sig_loss_ix)+' were set to np.nan')
+        
+        if strip_only != False:
+            mid_ix = np.argmin(abs(x-strip_only*z_max))
+            ydata[mid_ix:] = np.nan
+
+            
+        #delete "nan" value in the eva_good
+        mask=~np.isnan(ydata)
+        ydata=ydata[mask]
+        x=x[mask]
+
+        #delete negative value
+        indices_to_delete= np.argwhere(ydata<0)
+        ydata=np.delete(ydata, indices_to_delete)
+        x=np.delete(x, indices_to_delete)
+
+        #lmfit function described above
+        gmodel = Model(func)
+        params = Parameters()
+        params.add('a', value=-184000, vary=True)#min=100000, max=300000)
+        params.add('b', value=0.004, vary=True, min=1e-6, max=1e-1)
+        result = gmodel.fit(ydata, params, x=x,weights=np.sqrt(1.0/ydata))#weights=np.sqrt(1.0/ydata)
+        
+        # color = cm.winter(np.linspace(0,1,totalfilenumber))
+        # plt.rc('axes', prop_cycle=(cycler('color', color)))
+        chi_sq = float(result.fit_report().split('chi-square')[1].split('\n')[0].split('=')[1])
+        #print(chi_sq)
+        chi_lst.append(chi_sq)
+        
+       
+
+        x_full_cell = np.linspace(0,z_max, 10000)
+        ax.scatter(x/10000,ydata, color=colors[i], facecolor = 'none')
+        ax.plot(x_full_cell/10000, func(x_full_cell, result.params['a'].value, result.params['b'].value), color = colors[i])
+
+
+    layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)')
+    fig,ax = plt.subplots()
+    plt.scatter(index,chi_lst)
+    layout(ax, x_label='Measurement Index', y_label= 'chi squared') 
 
 def curvefitting_LFO(eva_class, int_loss_filter = 0.3, strip_only = False):
     if hasattr(eva_class,'eva_good'):

@@ -923,6 +923,8 @@ def Z_pRCPE(f,R,Q,alpha):
     Z = 1 / (1 / Q_z + 1 / R_z)
     return(Z)
 
+    
+    
 def find_pRCPE(parameter,parameter_value):
     '''
     Insert the circuit.get_param_names()[0] and circuit.parameters_.tolist()  (parameter names & values) into this function, and returns a touple of (R, Q, alpha) for each parallel R-CPE found in the fitted EIS data.
@@ -936,13 +938,16 @@ def find_pRCPE(parameter,parameter_value):
             CPE = 'CPE'+R_i
             Q = CPE+'_0'
             alpha = CPE + '_1'
+            C = 'C'+R_i
             if Q in parameter:
                 pRCPE = (parameter_value[parameter.index(R)],parameter_value[parameter.index(Q)],parameter_value[parameter.index(alpha)])
                 p_RCPE_lst.append(pRCPE)
+            elif C in parameter:
+                pRCPE = (parameter_value[parameter.index(R)],parameter_value[parameter.index(C)],1)
+                p_RCPE_lst.append(pRCPE)
     return(p_RCPE_lst)
 
-
-def plot_pRCPE(ax,para_names,para_value):
+def plot_pRCPE(ax,f,para_names,para_value):
     '''
     Insert ax from fig,ax to plot, para names commonly found as circuit.get_param_names()[0] and parameter values found as circuit.parameters_.tolist()
     '''
@@ -955,4 +960,146 @@ def plot_pRCPE(ax,para_names,para_value):
         ax.fill_between(np.real(Z_calc)+R_sum,0, -np.imag(Z_calc),alpha=0.3)
         R_sum += entry[0]
     return(ax)
-    
+
+def rmse(a, b):
+    """
+    A function which calculates the root mean squared error
+    between two vectors.
+
+    Notes
+    ---------
+    .. math::
+
+        RMSE = \\sqrt{\\frac{1}{n}(a-b)^2}
+    """
+
+    n = len(a)
+    return np.linalg.norm(a - b) / np.sqrt(n)
+
+
+
+def is_ascending(lst):
+    for i in range(len(lst) - 1):
+        if lst[i] > lst[i + 1]:
+            return False
+    return True
+
+def tau_ordering(circuit):
+    '''
+    Insert parameters from circuit fitting with R0-6xpRC return a True if the pRC are in ascending time constant order, else Falsae
+    '''
+    circuit_des = circuit.circuit
+    parameters = circuit.parameters_
+    lst = []
+    i_max = len(parameters)
+    i = 1
+    if 'W' in circuit_des:
+        # Warburg Element detected. Other tau ordering required.
+        capital = []
+        for cha in circuit_des:
+            if cha.isupper():
+                capital.append(cha)
+        while i+1 <=i_max:
+            if capital[i] == 'R' and capital[i+1] == 'C':
+                t = parameters[i]*parameters[i+1]
+                lst.append(t)
+                i += 2
+            else:
+                t = parameters[i]*parameters[i+3]
+                lst.append(t)
+                W = parameters[i+1], parameters[i+2]
+                i += 4  
+        print(W)
+        if is_ascending(lst) == False:
+            return False
+        return (lst)
+    else:
+        while i+1 <=i_max:
+            t = parameters[i]*parameters[i+1]
+            lst.append(t)
+            i += 2
+        if is_ascending(lst) == False:
+            return False
+        return (lst)
+
+def R6RCW_fit(echem_eva_PEIS,lf_limit = 0,hf_limit = math.inf,plotting = True, sub= True, save = False, KK = False):
+    circuit = CustomCircuit(initial_guess=[50], circuit='R0')
+    for cy in range(len(echem_eva_PEIS['Nyquist data'][0])):
+        if circuit._is_fit():
+            circuit.initial_guess = circuit.parameters_
+            print('Copied fitting paramter from before: '+str(cy))
+        else:
+            R0_ini = echem_eva_PEIS['Nyquist parameter']['R0'][cy]
+            R1_ini = echem_eva_PEIS['Nyquist parameter']['R1'][cy]
+            C1_ini = echem_eva_PEIS['Nyquist parameter']['CPE1_0'][cy]
+            
+            circuit = CustomCircuit(initial_guess=[
+                R0_ini,
+                R1_ini/5, 1e-7,
+                R1_ini/5, 1e-6,
+                R1_ini/5, 1e-5,
+                R1_ini/5, 1e-3,
+                R1_ini/5, 50,1e-3, 1e-2
+                ], circuit='R0-p(R1,C1)-p(R2,C2)-p(R3,C3)-p(R4,C4)-p(R5-Wo1,C5)')
+            
+        data = echem_eva_PEIS['Nyquist data'][0][cy]
+        fit = echem_eva_PEIS['Nyquist data'][1][cy]
+        freq = data[0]
+        Re = data[1]
+        Im = data[2]
+        
+        # lf and hf limit
+        lf_index = np.argwhere(np.array(freq)>lf_limit)[-1][0]
+        hf_index = np.argwhere(np.array(freq)<hf_limit)[0][0]
+        freq = freq[hf_index:lf_index]
+        Re = Re[hf_index:lf_index]
+        Im = Im[hf_index:lf_index]
+                    
+        f = np.array(freq)
+        Z = np.complex128(np.array(Re)-1j*(np.array(Im)))
+
+        
+        circuit.fit(f,Z)#, global_opt=True)
+        f_pred = np.array(freq)
+        fitted = circuit.predict(f_pred)
+        print(circuit)
+        Im_fit = -fitted.imag
+        Re_fit = fitted.real.tolist()
+
+        # simplified fit
+        #plt.plot(fit[1],fit[2], color = 'red', linestyle = '--')
+        Z_fit = np.complex128(np.array(Re_fit)-1j*(np.array(Im_fit)))
+        RMSE = rmse(Z,Z_fit)
+        
+        if plotting == True:
+            fig,ax = plt.subplots()
+            # plotting
+            plt.scatter(data[1],data[2], color = 'black')
+            # advanced fit
+            plt.plot(Re_fit,Im_fit, color = 'red', label = 'fit: '+str(round(RMSE,2)))#color = T_color[cell[1]])
+            
+            # plot individual p(R-CPE) components of circuit.
+            if sub == True:
+                plot_pRCPE(ax,f_pred,circuit.get_param_names()[0],circuit.parameters_.tolist())           
+
+            layout(ax, x_label='Re ($\mathregular{\u03A9}$)', y_label='-Im ($\mathregular{\u03A9}$)',square=True, size = [10,6])
+            if save == True:                 
+                plt.savefig('R6RCW_fit_'+str(cy)+'.svg',bbox_inches='tight')
+        if KK == True:
+            KK_data = KK_test(data)
+            
+        #Calculate RMSE of fit.
+        Z_fit = np.complex128(np.array(Re_fit)-1j*(np.array(Im_fit)))
+        RMSE = rmse(Z,Z_fit)
+        print('RMSE:'+str(round(rmse(Z,Z_fit),3)))
+        
+        if tau_ordering(circuit) == False:
+            print('Tau ordering failed. Initial guesses rest and data not saved.')
+            circuit = CustomCircuit(initial_guess=[50], circuit='R0')
+            continue
+        else:
+            tau_lst = tau_ordering(circuit)
+        if RMSE >= 50:
+            print('Bad fit detected. Initial guesses reset and data not saved.')
+            circuit = CustomCircuit(initial_guess=[50], circuit='R0')
+            continue

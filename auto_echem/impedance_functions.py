@@ -414,6 +414,27 @@ def fit(freq,Re,Im,circ = "",fit_counter = 0, ignore_posIm=True):
             circuit = CustomCircuit(initial_guess=[[300, .00000001, .85, 10, .001, .85]], circuit='p(R1,CPE1)-p(R2,CPE2)')
         circuit.fit(f,Z)
     
+    elif circ =='6RC-W':
+        if fit_counter == 0:
+            circuit = CustomCircuit(initial_guess=[
+                50,
+                100, 1e-7,
+                100, 1e-6,
+                100, 1e-5,
+                50, 1e-3,
+                50, 50,1e-3, 1e-2
+                ], circuit='R0-p(R1,C1)-p(R2,C2)-p(R3,C3)-p(R4,C4)-p(R5-Wo1,C5)')
+        if fit_counter == 1:
+            circuit = CustomCircuit(initial_guess=[
+                1000,
+                100, 1e-7,
+                100, 1e-6,
+                100, 1e-5,
+                50, 1e-3,
+                50, 50,1e-3, 1e-2
+                ], circuit='R0-p(R1,C1)-p(R2,C2)-p(R3,C3)-p(R4,C4)-p(R5-Wo1,C5)')
+                
+    
     else:
         print(str(circ)+' is not defined.')
    

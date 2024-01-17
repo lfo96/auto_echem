@@ -762,7 +762,7 @@ def plot_gradient_fit(eva_class, int_loss_filter = 0.3, strip_only = False, inde
 
         x_full_cell = np.linspace(0,z_max, 10000)
         ax.scatter(x/10000,ydata, color=colors[i], facecolor = 'none')
-        ax.plot(x_full_cell/10000, func(x_full_cell, result.params['a'].value, result.params['b'].value), color = colors[i])
+        ax.plot(x_full_cell/10000, func(x_full_cell, result.params['a'].value, result.params['b'].value), color = colors[i], label = str(i))
 
 
     layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)')
@@ -789,6 +789,9 @@ def curvefitting_LFO(eva_class, int_loss_filter = 0.3, strip_only = False):
     area_strip_list = []
     area_plate_err_list = []
     area_strip_err_list = []
+    
+    z_fit_lst = []
+    conc_fit_lst = []
 
     def func(x, a, b):
         return  (a)/1000*((b/(3.1415)**0.5)*np.exp(-((((-x+z_max)/1e6)/b)**2))-((((-x+z_max)/1e6))*special.erfc(((-x+z_max)/1e6)/b)))-(a/1000)*((b/(3.1415)**0.5)*np.exp(-(((((x)/1e6))/b)**2))-((((x)/1e6))*special.erfc(((x)/1e6)/b)))+c_ini
@@ -842,8 +845,10 @@ def curvefitting_LFO(eva_class, int_loss_filter = 0.3, strip_only = False):
 
         x_full_cell = np.linspace(0,z_max, 10000)
         ax.scatter(x/10000,ydata, color=colors[i], facecolor = 'none')
-        ax.plot(x_full_cell/10000, func(x_full_cell, result.params['a'].value, result.params['b'].value), color = colors[i])
-
+        conc_fit = func(x_full_cell, result.params['a'].value, result.params['b'].value)
+        ax.plot(x_full_cell/10000, conc_fit, color = colors[i])
+        z_fit_lst.append(x_full_cell/10000)
+        conc_fit_lst.append(conc_fit)
 
         a,a_err,b,b_err = noneTOnan([result.params['a'].value]),noneTOnan([result.params['a'].stderr]),noneTOnan([result.params['b'].value]),noneTOnan([result.params['b'].stderr])
         
@@ -885,6 +890,8 @@ def curvefitting_LFO(eva_class, int_loss_filter = 0.3, strip_only = False):
     eva_class.b_list_err = b_list_err
     eva_class.plate_area, eva_class.plate_area_err = area_plate_list, area_plate_err_list
     eva_class.strip_area, eva_class.strip_area_err = area_strip_list, area_strip_err_list
+    eva_class.conc_fit_lst = conc_fit_lst
+    eva_class.z_fit_lst = z_fit_lst
         
     return
 

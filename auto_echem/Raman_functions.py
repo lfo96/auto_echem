@@ -222,14 +222,18 @@ def peak_ratio(pathway, BLR = False, BL_FSI = [], BL_G4 = [], wn_min = 680,wn_ma
         df_z_ref = df_z.loc[(df_z['#Wave']>=407.5) & (df_z['#Wave']<=425)]
         #df_z_ref = df_z.loc[(df_z['#Wave']>=1060) & (df_z['#Wave']<=1080)]
         #df_z_ref = df_z.loc[(df_z['#Wave']>=635) & (df_z['#Wave']<=650)]
-        
-        A, mu, sigma = fit_gaussian_to_data(df_z_ref['#Wave'],df_z_ref['#Intensity'])
         x_data = np.linspace(df_z_ref['#Wave'].iloc[0], df_z_ref['#Wave'].iloc[-1], 1000)
-        max_index = np.argmax(gaussian(x_data,A,mu,sigma))
-        # Use the index to get the corresponding x value from x_data and save the ref max wavenumber (can be used for T determination)
-        x_at_max = x_data[max_index]
-        ref_max_wn.append(x_at_max)
         
+        # Use the index to get the corresponding x value from x_data and save the ref max wavenumber (can be used for T determination)
+        try:
+            A, mu, sigma = fit_gaussian_to_data(df_z_ref['#Wave'],df_z_ref['#Intensity'])
+            max_index = np.argmax(gaussian(x_data,A,mu,sigma))
+            x_at_max = x_data[max_index]
+            ref_max_wn.append(x_at_max)
+        except RuntimeError:
+            print('Runtime Error detected.')
+            ref_max_wn.append(np.nan)
+
         # Decide which kind of reference max caclulation
         ref_max = gaussian(x_data,A,mu,sigma).max()
         #ref_max = df_z_ref['#Intensity'].max()

@@ -367,7 +367,7 @@ def plot_gradient_BLcorrected(eva_class):
     
     return
 
-def signal_integration_map(eva_class, plot = True):
+def signal_integration_map(eva_class, plot = True, eva_cutZ=False):
     '''
     Insert eva_class which contains the BLR corrected Intensity_norm eva's named eva_class.eva_extref and add the intensity map (integrated from 425 till the end) for all z and t values under eva_class.int_map
     '''
@@ -383,9 +383,19 @@ def signal_integration_map(eva_class, plot = True):
             I_int_i = simps(-df_int['#Intensity_norm'],df_int['#Wave'])
             I_int_z.append(I_int_i) 
         I_int.append(I_int_z)
-    eva_class.int_map = I_int
-    eva_class.int_map_norm = (I_int - np.min(I_int)) / (np.max(I_int) - np.min(I_int))
     
+    if eva_cutZ == True:
+        z_del = eva_class.eva_cutZ_indices
+        z_del_positive = [len(I_int[0]) + x if x < 0 else x for x in z_del]
+        z_del_sorted = sorted(z_del_positive, reverse=True)
+        for idx in z_del_sorted:
+            I_int = np.delete(I_int, idx, axis=1)
+            
+    I_int_norm = (I_int - np.min(I_int)) / (np.max(I_int) - np.min(I_int))   
+    
+    eva_class.int_map = I_int
+    eva_class.int_map_norm = I_int_norm
+     
     if plot == True:
         # Function to show the heat map
         plt.imshow(eva_class.int_map_norm, cmap = 'magma', interpolation='none', aspect = 'auto')

@@ -606,7 +606,8 @@ def eva_cutZ(eva_class, z_del = []):
             int_map_norm_cutZ.append(np.delete(entry, z_del))
         eva_class.int_map_norm = int_map_norm_cutZ
             
-            
+    eva_cutZ_indices = z_del
+    eva_class.eva_cutZ_indices = eva_cutZ_indices            
     eva_class.eva_cutZ = eva_cutZ
     eva_class.z_valuesCut = eva_cutZ[list(dict.keys(eva_cutZ))[0]][0]
     return
@@ -1066,7 +1067,7 @@ def calc_t_hittorf(eva_class, i, f, side = 'strip', t = '', SVF=1.08):
     t_plus_0_h=1-(flux*F*SVF)/total_charge
     return(t_plus_0_h)
 
-def lin_fit_calct(eva_class,cut_off_time_h = 5, plate = False):
+def lin_fit_calct(eva_class,cut_off_time_h = 5, plate = False, list_del = []):
     '''
     Insert eva_class and a cut_off_time_h in hours which sets the cut off time for the linear fit of the integrated concentration values. Linear fit, and the calculate the transference number in hittorf style.
     Returns the transference numbert for the stripping and platting side.
@@ -1081,6 +1082,10 @@ def lin_fit_calct(eva_class,cut_off_time_h = 5, plate = False):
     fig,ax = plt.subplots()
     
     x,y = t,eva_class.strip_area[:cut_off_index]
+    
+    x = np.delete(x, list_del)
+    y = np.delete(y, list_del)
+    
     plt.scatter(x,y, label = 'strip')
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,y)
     y_fit = slope * np.array(x) + intercept
@@ -1100,6 +1105,7 @@ def lin_fit_calct(eva_class,cut_off_time_h = 5, plate = False):
     
     layout(ax, y_label = 'Integrated Concentration', x_label='time (h)')
     return(t_0_h)
+
 
 def plot_OP(eva_class):
     echem = eva_class.echem

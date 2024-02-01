@@ -309,7 +309,8 @@ def create_BL_OCV(eva_class,start = '', stop = ''):
     
     # Create Baseline of Sapphire Reference Signal from OCV condition (where system is under thermal equilibirum)
     if start =='' and stop =='':
-        start, stop = 3, int(start_index)
+        #start, stop = 3, int(start_index)
+        start, stop = 7, int(start_index)
         
     int_FSI_lst = []
     int_G4_lst = []

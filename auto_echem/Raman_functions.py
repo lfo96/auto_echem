@@ -1212,7 +1212,7 @@ def find_time_match(eva_class, time_dif_value = 1):
                 continue
         return(time_cut_index,min_index_lst)
 
-def calc_X(eva_class,list_del = [], error_thresh = 1, time_dif_value = 1):
+def calc_X(eva_class,list_del = [], error_thresh = 1, time_dif_value = 1, max_meas_ix = False):
     '''
     param eva_good: the eva dict without outliers
     param T: temperature
@@ -1251,6 +1251,9 @@ def calc_X(eva_class,list_del = [], error_thresh = 1, time_dif_value = 1):
     x_axis=[0] # The first data is meaningless, set to 0
     x_axis_std=[0] # The first data is meaningless, set to 0
     
+    if max_meas_ix != False:
+        a_list, b_list, a_list_err, b_list_err = a_list[:max_meas_ix], b_list[:max_meas_ix], a_list_err[:max_meas_ix], b_list_err[:max_meas_ix]
+        eta_c = eta_c[t_CP_PEIS][:max_meas_ix]        
 
     def func(x, a, b):
         return  (a)/1000*((b/(3.1415)**0.5)*np.exp(-((((-x+z_max)/1e6)/b)**2))-((((-x+z_max)/1e6))*special.erfc(((-x+z_max)/1e6)/b)))-(a/1000)*((b/(3.1415)**0.5)*np.exp(-(((((x)/1e6))/b)**2))-((((x)/1e6))*special.erfc(((x)/1e6)/b)))+c_ini
@@ -1267,6 +1270,10 @@ def calc_X(eva_class,list_del = [], error_thresh = 1, time_dif_value = 1):
     for i in range(1,len(a_list)):
         func_z_final = func(z_max,a_list[i],b_list[i])
         func_z_0 = func(0,a_list[i],b_list[i])
+
+        print(i,func_z_final,func_z_0)
+        # if func_z_final or func_z_0 <= 0:
+        #     func_z_0, func_z_final = np.nan, np.nan
         x_axis.append(-math.log(func_z_final/func_z_0))
         
         # standard_deviation of x_axis

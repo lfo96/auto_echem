@@ -408,16 +408,40 @@ def signal_integration_map(eva_class, plot = True, eva_cutZ=False):
         plt.colorbar()
     return
 
-def convert_to_eva(eva_ini):
+density_1MLiFSIG4 = {
+    273+20 : 1.1201,
+    273+30 : 1.1112,
+    273+40 : 1.1023,
+    273+50 : 1.0934}
+
+def molal_to_molar(molal,roh, M=0.1871):
+    '''
+    Convert molality (mol/kg) into molarity (mol/L). 
+    Insert the molal value, density and Molar mass.
+    Assumes LiFSI as a salt if not specified otherwise (187.1 g/mol)    
+    '''
+    c = (roh*molal)/(1+molal*M)
+    return(c)
+
+
+def convert_to_eva(eva_class):
     '''
     Convert the prepared eva_class.eva_extref into a eva_final in the same form as the conventional analysis has happened.
     '''
+    eva_ini = eva_class.eva_extref
+    roh = density_1MLiFSIG4[eva_class.temp]
+    m_ini = eva_class.m_ini
+    # Raman measurement is probing volume not mass; so every change in area corresponds to a change in molar concentration. Thus need to shift everything by the molality to molarity conversion.
+    cor_factor = molal_to_molar(m_ini,roh)
+    print('Initial concentration has been converted from '+str(m_ini)+' mol/kg to '+str(round(cor_factor,3))+' mol/L')
     eva_final = {}
     for i,entry in enumerate(eva_ini):
         z_lst = list(np.array(eva_ini[entry][1])*1000) # convert back to um
-        FSI_conc = eva_ini[entry][6] # FSI concentration
+        area_change = eva_ini[entry][6] # FSI intensity change
+        FSI_conc = np.array(area_change)*cor_factor # convert the area change to a concentrationFSI_concconcentration
         eva_final[i] = [z_lst,FSI_conc]
     return(eva_final)
+
 
     
     

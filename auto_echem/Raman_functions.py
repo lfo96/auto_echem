@@ -443,7 +443,13 @@ def convert_to_eva(eva_class):
     return(eva_final)
 
 
-    
+# Measured from density measurements; see PaperFigures.ipynb for calculation.
+SVF_1MLiFSIG4 = {
+    20 : 1.0764343203802311,
+    30 : 1.0756299106624074,
+    40 : 1.0745979630050677,   
+    50: 1.0735633508585876
+    }   
     
     
     
@@ -1029,6 +1035,7 @@ def calc_D(eva_class, list_del = []):
 
 #def calc_t(J,Dapp,total_file_number,Raman_time_stepa_list,a_list_err,v_z,solvent_velocity_factor,list1,Raman_time_step):
 def calc_t(eva_class, solvent_velocity_factor = 1.08, v_z = 1,list_del = [], error_thresh = 0.2):
+    solvent_velocity_factor = SVF_1MLiFSIG4[eva_class.temp]
     a_list = eva_class.a_list
     a_list_err = eva_class.a_list_err
     J = eva_class.I_areal
@@ -1079,6 +1086,7 @@ def calc_t_hittorf(eva_class, i, f, side = 'strip', t = '', SVF=1.08):
     Returns tranference number 
     '''
     F=96485.3321      #unit:s A / mol
+    SVF = SVF_1MLiFSIG4[eva_class.temp]
     I_areal = eva_class.I_areal
     if np.isscalar(t) and t =='':
         t_linescan = eva_class.time_CP[eva_class.time_CP>0]

@@ -1453,10 +1453,11 @@ def save_evaclass_LFO(self, name_add = ''):
         Destination for exporting model object
     It converts all the entries into JSON serizable objeccts. It struggles with the echem dictinoiary so will leave that out for the moment :(
     """
-    members = [attr for attr in dir(self) if not callable(getattr(self, attr)) and not attr.startswith("__")]
+    eva_class = copy.deepcopy(self)
+    members = [attr for attr in dir(eva_class) if not callable(getattr(eva_class, attr)) and not attr.startswith("__")]
    
-    exp_name = self.p_raman.split('\\')[-1][:-1]
-    pathway =self.p_out+'\\'+exp_name+str(name_add)+'.json'
+    exp_name = eva_class.p_raman.split('\\')[-1][:-1]
+    pathway = eva_class.p_out+'\\'+exp_name+str(name_add)+'.json'
     eva_dict = {}
     non_serizable = ['echem']
     need_convert = ['eva_extref_noBL', 'eva_extref']
@@ -1465,11 +1466,11 @@ def save_evaclass_LFO(self, name_add = ''):
             print(str(entry)+' cannot be converted to serizable object and thus exported to JSON.')
             continue
         elif entry in need_convert:
-            attr_value = getattr(self, entry)
+            attr_value = getattr(eva_class, entry)
             print('Converting to serializable object: '+entry)
             eva_dict[entry] = convert_eva_extref_serializable(attr_value)
         else:
-            attr_value = getattr(self, entry)
+            attr_value = getattr(eva_class, entry)
             eva_dict[entry] = convert_to_json_serializable(attr_value)
     
     with open(pathway, 'w') as f:

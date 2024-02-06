@@ -445,10 +445,10 @@ def convert_to_eva(eva_class):
 
 # Measured from density measurements; see PaperFigures.ipynb for calculation.
 SVF_1MLiFSIG4 = {
-    20 : 1.0764343203802311,
-    30 : 1.0756299106624074,
-    40 : 1.0745979630050677,   
-    50: 1.0735633508585876
+    293 : 1.0764343203802311,
+    303 : 1.0756299106624074,
+    313 : 1.0745979630050677,   
+    323: 1.0735633508585876
     }   
     
     

@@ -25,6 +25,7 @@ from scipy       import integrate
 import numpy             as np
 
 import os
+import copy
 
 def create_path_if_not_exists(path):
     if not os.path.exists(path):

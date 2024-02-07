@@ -426,15 +426,16 @@ def molal_to_molar(molal,roh, M=0.1871):
 
 
 def convert_to_eva(eva_class):
-    '''
-    Convert the prepared eva_class.eva_extref into a eva_final in the same form as the conventional analysis has happened.
-    '''
     eva_ini = eva_class.eva_extref
     roh = density_1MLiFSIG4[eva_class.temp]
     m_ini = eva_class.m_ini
     # Raman measurement is probing volume not mass; so every change in area corresponds to a change in molar concentration. Thus need to shift everything by the molality to molarity conversion.
     cor_factor = molal_to_molar(m_ini,roh)
     print('Initial concentration has been converted from '+str(m_ini)+' mol/kg to '+str(round(cor_factor,3))+' mol/L')
+    eva_class.c_ini = cor_factor
+    '''
+    Convert the prepared eva_class.eva_extref into a eva_final in the same form as the conventional analysis has happened.
+    '''
     eva_final = {}
     for i,entry in enumerate(eva_ini):
         z_lst = list(np.array(eva_ini[entry][1])*1000) # convert back to um

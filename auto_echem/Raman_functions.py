@@ -545,6 +545,37 @@ class eva_concgradient():
         I_areal = echem['data']['5 CP']['I/mA'].mean()/echem['electrode surface area'] # areal current in mA/cm2
         self.I_areal = I_areal
         return
+# old evacut - messes up the c_in; not sure why I did that in the first place
+# def evacut_LFO(eva_class):
+#     '''
+#     return the cutted eva (remove all OCV scans)
+#     '''
+#     eva = eva_class.eva
+#     t_OCV = eva_class.t_OCV 
+#     t_linescan= eva_class.t_linescan
+#     start_index = t_OCV/t_linescan
+#     print("The index when current applied is "+str(round(start_index,2)))
+#     time_cp = np.array(list(eva.keys()))-t_OCV/t_linescan # in t_linescan units
+#     time_cp_h = time_cp * t_linescan
+#     eva_class.time_CP = time_cp_h
+#     eva_cut = {}
+#     c_ini_mean = []
+#     fig,ax = plt.subplots()
+#     for i,entry in enumerate(eva):
+#         time = time_cp_h[i]
+#         if time >=0:
+#             eva_cut[entry-int(round(start_index))] = eva[entry] # Create a new eva_cut with index that correspoinds to timestamps in hour from onset of CC.
+#         else:
+#             c_ini_mean.append(np.nanmean(eva[entry][1][3:-3]))
+#             plt.scatter(np.array(eva[entry][0][3:-3])/1000,eva[entry][1][3:-3])
+#     layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)', title = 'OCV Gradient')
+#     if len(c_ini_mean)!=0:         
+#         c_ini = np.array(c_ini_mean).mean()
+#         c_ini_std = np.array(c_ini_mean).std()
+#         print('Initial Concentration is: '+str(c_ini)+' -+'+str(c_ini_std))
+#         eva_class.c_ini = c_ini
+#     eva_class.eva_cut = eva_cut
+#     return
 
 def evacut_LFO(eva_class):
     '''
@@ -559,21 +590,14 @@ def evacut_LFO(eva_class):
     time_cp_h = time_cp * t_linescan
     eva_class.time_CP = time_cp_h
     eva_cut = {}
-    c_ini_mean = []
     fig,ax = plt.subplots()
     for i,entry in enumerate(eva):
         time = time_cp_h[i]
         if time >=0:
             eva_cut[entry-int(round(start_index))] = eva[entry] # Create a new eva_cut with index that correspoinds to timestamps in hour from onset of CC.
         else:
-            c_ini_mean.append(np.nanmean(eva[entry][1][3:-3]))
-            plt.scatter(np.array(eva[entry][0][3:-3])/1000,eva[entry][1][3:-3])
+            plt.scatter(np.array(eva[entry][0][:])/1000,eva[entry][1][])
     layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)', title = 'OCV Gradient')
-    if len(c_ini_mean)!=0:         
-        c_ini = np.array(c_ini_mean).mean()
-        c_ini_std = np.array(c_ini_mean).std()
-        print('Initial Concentration is: '+str(c_ini)+' -+'+str(c_ini_std))
-        eva_class.c_ini = c_ini
     eva_class.eva_cut = eva_cut
     return
 

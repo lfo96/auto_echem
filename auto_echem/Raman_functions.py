@@ -415,6 +415,13 @@ density_1MLiFSIG4 = {
     273+40 : 1.1023,
     273+50 : 1.0934}
 
+G4_1MLiFSIG4_conc = {
+    20 : 4.244534124959221,
+    30 : 4.21080824895517,
+    40 : 4.17708237295112,
+    50 : 4.143356496947069,
+}
+
 def molal_to_molar(molal,roh, M=0.1871):
     '''
     Convert molality (mol/kg) into molarity (mol/L). 

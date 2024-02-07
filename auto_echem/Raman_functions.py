@@ -596,7 +596,7 @@ def evacut_LFO(eva_class):
         if time >=0:
             eva_cut[entry-int(round(start_index))] = eva[entry] # Create a new eva_cut with index that correspoinds to timestamps in hour from onset of CC.
         else:
-            plt.scatter(np.array(eva[entry][0][:])/1000,eva[entry][1][])
+            plt.scatter(np.array(eva[entry][0][:])/1000,eva[entry][1][:])
     layout(ax, x_label='Cell length (mm)', y_label=r'Concentration ($\mathregular{mol\,L^{-1}}$)', title = 'OCV Gradient')
     eva_class.eva_cut = eva_cut
     return

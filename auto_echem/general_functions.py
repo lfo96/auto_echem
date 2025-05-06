@@ -13,7 +13,7 @@ import matplotlib as mpl
 from scipy.stats import linregress
 from stat import ST_CTIME
 from matplotlib import cm
-from IPython.display import set_matplotlib_formats
+from IPython import get_ipython
 from itertools import islice
 from galvani import BioLogic as BL
 #from galvaniV021 import Biologic as BL

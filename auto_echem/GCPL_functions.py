@@ -15,7 +15,9 @@ from auto_echem.general_functions import data_set
 
 
 # from .neware_reader_master.neware import *
-from scipy.integrate import simps
+# from scipy.integrate import simps
+from scipy.integrate._quadrature import simps
+
 
 def has_decreasing_numbers(data):
     """

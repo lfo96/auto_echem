@@ -12,7 +12,9 @@ import math
 import matplotlib as mpl
 from scipy       import integrate, special,optimize
 from scipy       import integrate, special,optimize
-from scipy.integrate import simps
+from scipy.integrate import simpson
+def simps(y, x=None, **kwargs):
+    return simpson(y, x=x, **kwargs)
 from auto_echem.auto import auto
 import matplotlib.cm     as cm
 from lmfit       import Model, Parameters, minimize, fit_report
@@ -125,7 +127,7 @@ def concloading_LFO(raman_p,out_p,fun,meas_index = []):
         c=[]
         for i in range(len(z)):
             d1 = d.loc[d['Z']==z[i]]
-            p5=out_p+r'\raman_linescan.txt'
+            p5 = os.path.join(out_p, 'raman_linescan.txt')
             with open(p5, 'w', encoding="utf8", errors="ignore") as f:
                 for j in range(len(d1['Wave'])):
                     f.write(str(d1['Wave'].iloc[j]))
@@ -278,7 +280,7 @@ def eva_load_extref(eva_class):
     '''
     
     p_raman = eva_class.p_raman
-    folder = ('\\').join(p_raman.split('\\')[:-1])
+    folder = os.path.dirname(p_raman)
     direc_files = list_files_with_last_modified_sorted(folder)
     auto_expo_files = []
     for entry in direc_files:
@@ -288,7 +290,7 @@ def eva_load_extref(eva_class):
     for entry in auto_expo_files:
         index = int(entry.split('.')[0].split('_')[-1])
         try:
-            eva_i = peak_ratio(folder+'\\'+entry, BLR=True)
+            eva_i = peak_ratio(os.path.join(folder, entry), BLR=True)
         except RuntimeError:
             print(str(index)+' timed out.')
             continue
@@ -340,11 +342,11 @@ def eva_OCV_BL(eva_class):
     int_FSI_mean = eva_class.int_FSI_mean
     int_G4_mean = eva_class.int_G4_mean
     p_raman = eva_class.p_raman
-    folder = ('\\').join(p_raman.split('\\')[:-1])
+    folder = os.path.dirname(p_raman)
     eva_extref = {}
     for entry in auto_expo_txt:
         index = int(entry.split('.')[0].split('_')[-1])
-        eva_i = peak_ratio(folder+'\\'+entry, BLR=True, BL_G4 = int_G4_mean, BL_FSI = int_FSI_mean)
+        eva_i = peak_ratio(os.path.join(folder, entry), BLR=True, BL_G4 = int_G4_mean, BL_FSI = int_FSI_mean)
         eva_extref[index] = eva_i
         print(str(index)+' processed.')
     eva_class.eva_extref = eva_extref
@@ -474,7 +476,7 @@ def find_BL(p_raman):
     '''
     BL_lst = []
     index_lst = []
-    direc = list_files_with_last_modified_sorted('\\'.join(p_raman.split('\\')[:-1]))
+    direc = list_files_with_last_modified_sorted(os.path.dirname(p_raman))
     for entry in direc:
         if len(entry[0])>=7 and (entry[0][-6]+entry[0][-5]) == 'BL' and entry[0][-1] == 't':
             BL_lst.append(entry[0])
@@ -1489,8 +1491,8 @@ def save_evaclass_LFO(self, name_add = ''):
     eva_class = copy.deepcopy(self)
     members = [attr for attr in dir(eva_class) if not callable(getattr(eva_class, attr)) and not attr.startswith("__")]
    
-    exp_name = eva_class.p_raman.split('\\')[-1][:-1]
-    pathway = eva_class.p_out+'\\'+exp_name+str(name_add)+'.json'
+    exp_name = os.path.basename(eva_class.p_raman)[:-1]
+    pathway = os.path.join(eva_class.p_out, exp_name+str(name_add)+'.json')
     eva_dict = {}
     non_serizable = ['echem']
     need_convert = ['eva_extref_noBL', 'eva_extref']

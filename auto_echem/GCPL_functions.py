@@ -4,8 +4,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import datetime
+import os
 from matplotlib import cm
 # import gspread
+
 
 from auto_echem.general_functions import info
 from auto_echem.general_functions import layout
@@ -16,7 +18,12 @@ from auto_echem.general_functions import data_set
 
 # from .neware_reader_master.neware import *
 # from scipy.integrate import simps
-from scipy.integrate._quadrature import simps
+# from scipy.integrate import simps
+# scipy renamed simps -> simpson and made x keyword-only; shim keeps old calls working
+from scipy.integrate import simpson
+
+def simps(y, x=None, **kwargs):
+    return simpson(y, x=x, **kwargs)
 
 
 def has_decreasing_numbers(data):
@@ -694,7 +701,7 @@ def eva_nda(pathway,m_am=np.nan,A_el=np.nan,data_log = False):
     meta['active material mass'] = m_am
     meta['electrode surface area'] = A_el
     meta['data'] = df
-    meta['ID'] = pathway.split('\\')[-1].split('.')[0]
+    meta['ID'] = os.path.splitext(os.path.basename(pathway))[0]
     
     if data_log == True:
         try:
@@ -927,7 +934,7 @@ def eva_folder_nda(folder_p,m_am = 1.5, A_el = 0.785):
     cells = data_set(folder_p)
     d = {}
     for entry in cells:
-        pathway = folder_p+"\\"+entry[0]
+        pathway = os.path.join(folder_p, entry[0])
         name = entry[0].split('.')[0]
         
         eva = eva_nda(pathway,m_am = m_am, A_el = A_el)
@@ -939,7 +946,7 @@ def eva_folder_nda(folder_p,m_am = 1.5, A_el = 0.785):
     cells = data_set(folder_p)
     d = {}
     for entry in cells:
-        pathway = folder_p+"\\"+entry[0]
+        pathway = os.path.join(folder_p, entry[0])
         name = entry[0].split('.')[0]
         
         eva = eva_nda(pathway,m_am = m_am, A_el = A_el)

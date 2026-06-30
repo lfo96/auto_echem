@@ -416,8 +416,8 @@ def read_in(pathway):
         print("Correct file selected.")
     else: 
         print("Please select the .mps setting file.")
-    path = pathway.replace(pathway.split('\\')[-1],'')
-    name = pathway.split('\\')[-1][0:-4]
+    path = os.path.dirname(pathway) + os.sep
+    name = os.path.splitext(os.path.basename(pathway))[0]
     #extract meta data
     meta_data = meta(pathway)
     meta_data['filename'] = name
@@ -721,11 +721,11 @@ def PEIStoTXT(Nyquist_data,filename,pathway):
     d['Re(Ohm)'] = Nyquist_data[1]
     d['Im(Ohm)'] = -Nyquist_data[2]
     df = pd.DataFrame(d)
-    df.to_csv(pathway+'\\'+filename+".txt",
+    df.to_csv(os.path.join(pathway, filename+".txt"),
         sep=' ',
         columns=['freq(Hz)','Re(Ohm)','Im(Ohm)'],
         index=False)
-    print('Successfully exported: '+str(pathway+'\\'+filename+".txt"))
+    print('Successfully exported: '+str(os.path.join(pathway, filename+".txt")))
         
 
 from scipy import sparse

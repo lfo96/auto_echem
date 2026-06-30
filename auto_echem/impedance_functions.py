@@ -3,7 +3,6 @@ import cmath
 import math
 # from altair.vegalite.v4.api import value
 import numpy as np
-from numpy.lib.nanfunctions import _nanquantile_dispatcher
 from contextlib import contextmanager
 import threading
 import _thread

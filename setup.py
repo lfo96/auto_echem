@@ -12,5 +12,6 @@ setup(
         'galvani',
         'impedance',
         'gspread',
+        'NewareNDA>=2026.6.11',  # .ndax reader; format is reverse-engineered, pin tightly
     ]
 )

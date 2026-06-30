@@ -8,7 +8,6 @@ import math
 
 from stat import ST_CTIME
 from matplotlib import cm
-from IPython.display import set_matplotlib_formats
 from itertools import islice
 from galvani import BioLogic as BL
 from contextlib import contextmanager

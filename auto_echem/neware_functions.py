@@ -45,6 +45,13 @@ import zipfile
 import xml.etree.ElementTree as ET
 import numpy as np
 import pandas as pd
+from scipy.integrate import simpson
+
+from auto_echem.general_functions import isclose
+
+def _simps(y, x):
+    """Thin wrapper so energy integration matches the rest of the package."""
+    return simpson(y, x=x)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -246,3 +253,168 @@ def read_neware(pathway: str) -> tuple:
             f"Unsupported file extension '{ext}'. "
             "Expected .ndax, .csv, or .txt."
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GCPL evaluation
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Status strings that indicate a charge or discharge step. Extend if new step
+# types appear (e.g. 'CC_Chg', 'CC_DChg').
+_CHG_STATUSES  = {'CCCV_Chg',  'CC_Chg'}
+_DCHG_STATUSES = {'CCCV_DChg', 'CC_DChg'}
+
+
+def eva_neware(pathway, m_am=np.nan, A_el=np.nan):
+    """
+    Read a Neware file and evaluate GCPL cycling data.
+
+    Returns a metadata dict whose structure mirrors the BioLogic auto()
+    output so all existing plotting functions (plot_galv, plot_CR) work
+    without changes.
+
+    Parameters
+    ----------
+    pathway : str
+        Path to a .ndax, .csv, or .txt Neware file.
+    m_am : float
+        Active material mass in mg. Required for gravimetric quantities.
+        Can be set after the fact: result['active material mass'] = 1.5
+    A_el : float
+        Electrode surface area in cm². Required for areal quantities.
+
+    Returns
+    -------
+    meta : dict
+        Keys always present:
+          'ID', 'source_file', 'format', 'Remark', 'TestGuid'
+          'active material mass' (mg), 'electrode surface area' (cm²)
+          'data'   – normalized raw DataFrame from read_neware()
+          'eva'    – tuple (eva_df, galv), same structure as eva_GCPL output:
+              eva_df  : DataFrame, one row per full cycle
+              galv    : list of per-cycle dicts with voltage/capacity curves
+
+    Example
+    -------
+    result = eva_neware('exp.csv', m_am=1.5, A_el=0.785)
+    plot_galv(result['eva'], cy=[1, 2, 5])
+    plot_CR(result['eva'])
+    """
+    df, meta = read_neware(pathway)
+    meta['active material mass'] = m_am
+    meta['electrode surface area'] = A_el
+
+    m_g = 0.001 * m_am  # mass in grams (avoids repeated conversion)
+
+    cap_dis,      cap_dis_calc      = [], []
+    cap_cha,      cap_cha_calc      = [], []
+    energy_dis,   energy_dis_calc   = [], []
+    energy_cha,   energy_cha_calc   = [], []
+    I_areal,      I_specific        = [], []
+    galv = []
+    cy_nos = []
+
+    for cy in sorted(df['cycle'].unique()):
+        df_cy = df[df['cycle'] == cy]
+
+        dchg = df_cy[df_cy['status'].isin(_DCHG_STATUSES)]
+        chg  = df_cy[df_cy['status'].isin(_CHG_STATUSES)]
+
+        if len(dchg) < 2 or len(chg) < 2:
+            # Skip cycles that don't have both a discharge and a charge step
+            # (e.g. a Rest-only cycle at the very start or end of the file).
+            continue
+
+        # ── Measured capacity (mAh/g) from Neware's integrated capacity column
+        grav_cap_dis = dchg['discharge_capacity/mAh'] / m_g
+        grav_cap_cha = chg['charge_capacity/mAh']     / m_g
+
+        # ── Calculated capacity: integrate |I|·dt cumulatively (matches BioLogic)
+        t_dis = dchg['time/s'] - dchg['time/s'].iloc[0]
+        t_cha = chg['time/s']  - chg['time/s'].iloc[0]
+        grav_cap_dis_calc = abs(dchg['current/mA']) * (t_dis / 3600) / m_g
+        grav_cap_cha_calc = abs(chg['current/mA'])  * (t_cha / 3600) / m_g
+
+        cap_dis.append(grav_cap_dis.iloc[-1])
+        cap_cha.append(grav_cap_cha.iloc[-1])
+        cap_dis_calc.append(grav_cap_dis_calc.iloc[-1])
+        cap_cha_calc.append(grav_cap_cha_calc.iloc[-1])
+
+        # ── Energy: area under V–Q curve (mWh/g), matches simps usage in eva_GCPL
+        en_dis      = _simps(dchg['voltage/V'].values, grav_cap_dis.values)
+        en_cha      = _simps(chg['voltage/V'].values,  grav_cap_cha.values)
+        en_dis_calc = _simps(dchg['voltage/V'].values, grav_cap_dis_calc.values)
+        en_cha_calc = _simps(chg['voltage/V'].values,  grav_cap_cha_calc.values)
+        energy_dis.append(en_dis)
+        energy_cha.append(en_cha)
+        energy_dis_calc.append(en_dis_calc)
+        energy_cha_calc.append(en_cha_calc)
+
+        # ── Areal and specific current (modal current, in mA)
+        I_d = abs(dchg['current/mA']).mode().mean()
+        I_c = abs(chg['current/mA']).mode().mean()
+        if isclose(I_d, I_c, rel_tol=0.01):
+            I = (I_d + I_c) / 2
+            I_areal.append(round(I * 1000 / A_el, 3))   # µA/cm²
+            I_specific.append(round(I / m_am, 3))        # mA/g
+        else:
+            I_areal.append([round(I_d * 1000 / A_el, 3),
+                            round(I_c * 1000 / A_el, 3)])
+            I_specific.append([round(I_d / m_am, 3),
+                               round(I_c / m_am, 3)])
+
+        cy_nos.append(cy)
+
+        # ── Per-cycle voltage/capacity curves for plot_galv
+        galv.append({
+            'Gravimetric Discharge Capacity (mAh/g)':            grav_cap_dis,
+            'Gravimetric Discharge Capacity Calculated (mAh/g)': grav_cap_dis_calc,
+            'Gravimetric Charge Capacity (mAh/g)':               grav_cap_cha,
+            'Gravimetric Charge Capacity Calculated (mAh/g)':    grav_cap_cha_calc,
+            'Discharge Potential (V)':  dchg['voltage/V'],
+            'Charge Potential (V)':     chg['voltage/V'],
+            'Discharge Time (s)':       t_dis,
+            'Charge Time (s)':          t_cha,
+            'Discharge Current (mA)':   dchg['current/mA'],
+            'Charge Current (mA)':      chg['current/mA'],
+        })
+
+    if not cy_nos:
+        print('Warning: no complete charge+discharge cycles found.')
+        meta['data'] = df
+        meta['eva'] = None
+        return meta
+
+    cap_dis  = np.array(cap_dis)
+    cap_cha  = np.array(cap_cha)
+    cap_dis_areal = cap_dis * m_g / A_el
+    cap_cha_areal = cap_cha * m_g / A_el
+
+    ce          = 100 * cap_dis      / cap_cha
+    ce_calc     = 100 * np.array(cap_dis_calc) / np.array(cap_cha_calc)
+    energy_ef      = 100 * np.array(energy_dis)      / np.array(energy_cha)
+    energy_ef_calc = 100 * np.array(energy_dis_calc) / np.array(energy_cha_calc)
+
+    eva = pd.DataFrame({
+        'Cycle':                                          cy_nos,
+        'Gravimetric Discharge Capacity (mAh/g)':        cap_dis,
+        'Gravimetric Discharge Capacity Calculated (mAh/g)': cap_dis_calc,
+        'Areal Discharge Capacity (mAh/cm$^2$)':         cap_dis_areal,
+        'Gravimetric Charge Capacity (mAh/g)':           cap_cha,
+        'Gravimetric Charge Capacity Calculated (mAh/g)': cap_cha_calc,
+        'Areal Charge Capacity (mAh/cm$^2$)':            cap_cha_areal,
+        'Coulombic Efficency (%)':                        ce,
+        'Coulombic Efficency Calculated (%)':             ce_calc,
+        'Discharge Energy (mWh/g)':                       energy_dis,
+        'Discharge Energy Calculated (mWh/g)':            energy_dis_calc,
+        'Charge Energy (mWh/g)':                          energy_cha,
+        'Charge Energy Calculated (mWh/g)':               energy_cha_calc,
+        'Energy Efficency (%)':                           energy_ef,
+        'Energy Efficenecy Calculated (%)':               energy_ef_calc,
+        'Areal Current (μA/cm$^2$)':                I_areal,
+        'Specific Current (mA/g)':                        I_specific,
+    })
+
+    meta['data'] = df
+    meta['eva']  = (eva, galv)
+    return meta
